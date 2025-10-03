@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"log"
-	"ssu-announcement-scraper/config"
-	"ssu-announcement-scraper/internal/dto"
+	"scraper/config"
+	"scraper/internal/dto"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -23,8 +23,9 @@ func SaveScrapedData(ctx context.Context, cfg *config.AppConfig, data []dto.Anno
 		}
 
 		_, err = dbClient.PutItem(ctx, &dynamodb.PutItemInput{
-			TableName: aws.String(tableName),
-			Item:      marshaledItem,
+			TableName:           aws.String(tableName),
+			Item:                marshaledItem,
+			ConditionExpression: aws.String("attribute_not_exists(Link)"), // 해당 공지가 디비에 없을 때만 추가
 		})
 		if err != nil {
 			log.Println("Failed to save item:", err)

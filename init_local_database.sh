@@ -9,6 +9,7 @@ aws dynamodb create-table \
     --attribute-definitions AttributeName=Link,AttributeType=S \
     --key-schema AttributeName=Link,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+    --stream-specification StreamEnabled=true,StreamViewType=NEW_IMAGE \
     --endpoint-url http://dynamodb-local:8000
 
 echo "Table created successfully!"

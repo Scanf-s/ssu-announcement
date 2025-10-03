@@ -8,10 +8,10 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"ssu-announcement-scraper/config"
-	"ssu-announcement-scraper/internal/repository"
-	"ssu-announcement-scraper/internal/scraper"
-	"ssu-announcement-scraper/internal/service/ssu_announcement_parser"
+	"scraper/config"
+	"scraper/internal/repository"
+	"scraper/internal/scraper"
+	"scraper/internal/service/ssu_announcement_parser"
 )
 
 func main() {

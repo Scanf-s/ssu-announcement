@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"ssu-announcement-scraper/config"
+	"scraper/config"
 )
 
 func ScrapeSSUAnnouncements(cfg *config.AppConfig) []byte {
