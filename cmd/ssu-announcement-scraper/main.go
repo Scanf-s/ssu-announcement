@@ -8,9 +8,9 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 
-	"ssu-announcement-notifier/config"
-	"ssu-announcement-notifier/internal/scraper"
-	"ssu-announcement-notifier/internal/service/ssu_announcement_parser"
+	"ssu-announcement-scraper/config"
+	"ssu-announcement-scraper/internal/scraper"
+	"ssu-announcement-scraper/internal/service/ssu_announcement_parser"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"ssu-announcement-notifier/internal/dto"
+	"ssu-announcement-scraper/internal/dto"
 
 	"github.com/PuerkitoBio/goquery"
 )

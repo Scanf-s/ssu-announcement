@@ -1,4 +1,4 @@
-module ssu-announcement-notifier
+module ssu-announcement-scraper
 
 go 1.25.1
 
