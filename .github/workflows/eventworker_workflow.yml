@@ -57,5 +57,5 @@ jobs:
       - name: Deploy docker image to lambda
         run: |
           aws lambda update-function-code \
-          --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+          --function-name ${{ secrets.EVENTWORKER_LAMBDA_FUNCTION_NAME }} \
           --image-uri ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }}

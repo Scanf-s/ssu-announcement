@@ -2,36 +2,50 @@ package main
 
 import (
 	"context"
-	"os"
+	"encoding/json"
+	"log"
+	"notifier/config"
+	"notifier/internal/dto"
+	"notifier/internal/repository"
+	"notifier/internal/service"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"gopkg.in/mail.v2"
 )
 
 func handleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
-	// 메일 설정
-	smtpHost := "smtp.gmail.com"
-	smtpPort := 587
-	smtpUser := os.Getenv("SMTP_USER")
+	cfg := config.LoadConfig()
 
 	// SQS 이벤트 처리 로직
 	for _, message := range sqsEvent.Records {
-		// 메시지 속성 추출
-		category := message.MessageAttributes["Category"].StringValue
-		link := message.MessageAttributes["Link"].StringValue
-		title := message.MessageAttributes["Title"].StringValue
-		date := message.MessageAttributes["Date"].StringValue
-		department := message.MessageAttributes["Department"].StringValue
-		status := message.MessageAttributes["Status"].StringValue
+		// 메시지 Body를 Announcement로 파싱
+		var announcement dto.Announcement
+		err := json.Unmarshal([]byte(message.Body), &announcement)
+		if err != nil {
+			continue
+		}
 
 		// 구독자 조회
+		emails, err := repository.GetSubscribers(ctx, cfg, announcement.Category)
+		if err != nil {
+			log.Printf("Error fetching subscribers: %v", err)
+			continue
+		}
+
+		log.Printf("Category: %s, Title: %s, Subscribers: %v", announcement.Category, announcement.Title, emails)
 
 		// 구독자들에게 이메일 알림 발송
+		err = service.SendEmail(cfg, emails, announcement)
+		if err != nil {
+			log.Printf("Error sending emails: %v", err)
+			continue
+		}
 
-		// 이벤트 메세지 삭제
-
+		// 처리 로그 출력
+		log.Printf("Processed message ID: %s", message.MessageId)
 	}
+
+	return nil
 }
 
 func main() {
