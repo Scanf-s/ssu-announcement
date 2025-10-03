@@ -14,7 +14,7 @@ func ScrapeSSUAnnouncements(cfg *config.AppConfig) []byte {
 	// Request 생성
 	request, err := http.NewRequest("GET", cfg.SSUAnnouncementURL, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Request client
@@ -23,14 +23,14 @@ func ScrapeSSUAnnouncements(cfg *config.AppConfig) []byte {
 	// Request 보내기
 	response, err := client.Do(request)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer response.Body.Close()
 
 	// Response body 읽기
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	return body

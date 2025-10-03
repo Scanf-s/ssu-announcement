@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"ssu-announcement-scraper/config"
+	"ssu-announcement-scraper/internal/repository"
 	"ssu-announcement-scraper/internal/scraper"
 	"ssu-announcement-scraper/internal/service/ssu_announcement_parser"
 )
@@ -37,6 +38,9 @@ func handleRequest(ctx context.Context, event json.RawMessage) (string, error) {
 	parsedResult := ssu_announcement_parser.ParseSSUAnnouncementsHtml(resultHtml)
 	log.Println(parsedResult)
 
+	// DynamoDB에 저장
+	repository.SaveScrapedData(ctx, cfg, parsedResult)
+
 	return "Success", nil
 }
 
@@ -52,4 +56,7 @@ func runLocal() {
 	// 공지사항 HTML 파싱해서 원하는 정보 추출
 	parsedResult := ssu_announcement_parser.ParseSSUAnnouncementsHtml(resultHtml)
 	log.Println(parsedResult)
+
+	// DynamoDB에 저장
+	repository.SaveScrapedData(context.TODO(), cfg, parsedResult)
 }
