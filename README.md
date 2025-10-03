@@ -29,43 +29,8 @@
 ---
 
 ## 아키텍처
+<img width="1327" height="792" alt="스크린샷 2025-10-04 오전 6 06 24" src="https://github.com/user-attachments/assets/eb263410-92b2-4ce0-88c2-8af21f85ca19" />
 
-```
-┌─────────────┐
-│  Scraper    │ (Lambda - EventBridge 트리거)
-│  공지 수집    │
-└──────┬──────┘
-       │
-       v
-┌─────────────┐
-│  DynamoDB   │
-│  공지 저장    │
-└──────┬──────┘
-       │
-       v
-┌─────────────┐
-│ EventWorker │ (Lambda - DynamoDB Stream 트리거)
-│ SQS 전송     │
-└──────┬──────┘
-       │
-       v
-┌─────────────┐
-│     SQS     │
-│  메시지 큐    │
-└──────┬──────┘
-       │
-       v
-┌─────────────┐
-│  Notifier   │ (Lambda - SQS 트리거)
-│ 이메일 발송    │
-└──────┬──────┘
-       │
-       v
-┌─────────────┐
-│ Subscribers │ (DynamoDB + GSI)
-│ 구독자 조회    │ - PK: UserId, SK: Category
-└─────────────┘ - GSI: CategoryIndex
-```
 ---
 
 ## 기술스택
