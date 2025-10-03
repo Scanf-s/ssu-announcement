@@ -1,7 +1,7 @@
-name: workflow.yml
+name: eventworker_workflow.yml
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "eventworker" ]
 
 jobs:
   build:
@@ -32,8 +32,8 @@ jobs:
 
       - name: Build and Push to ECR
         run: |
-          docker build -t ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }} .
-          docker push ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }}
+          docker build -f eventworker/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }} ./eventworker
+          docker push ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }}
 
   deploy:
     name: Deploy to lambda
@@ -56,6 +56,6 @@ jobs:
 
       - name: Deploy docker image to lambda
         run: |
-            aws lambda update-function-code \
-            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --image-uri ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }}
+          aws lambda update-function-code \
+          --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+          --image-uri ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }}
