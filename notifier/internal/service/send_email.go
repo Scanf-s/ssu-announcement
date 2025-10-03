@@ -10,6 +10,12 @@ import (
 )
 
 func SendEmail(cfg *config.AppConfig, emails []string, announcement dto.Announcement) error {
+	// 구독자가 없으면 빠르게 반환
+	if len(emails) == 0 {
+		log.Printf("No subscribers for category: %s", announcement.Category)
+		return nil
+	}
+
 	// 이메일 발송 로직
 	emailBodyTemplate :=
 		`
