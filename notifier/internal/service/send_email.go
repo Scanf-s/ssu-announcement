@@ -13,20 +13,22 @@ func SendEmail(cfg *config.AppConfig, emails []string, announcement dto.Announce
 	// 이메일 발송 로직
 	emailBodyTemplate :=
 		`
-		안녕하세요 숭실대학교 공지사항 알림 서비스입니다.
-		구독하신 %s 카테고리의 공지사항이 새로 등록되었습니다.\n\n
-		등록일자: %s
-		등록부서: %s
-		상세링크: %s
-		진행상태: %s
+안녕하세요 숭실대학교 공지사항 알림 서비스입니다.
+제목: %s
+카테고리: %s
+등록일자: %s
+등록부서: %s
+상세링크: %s
+진행상태: %s
 
-		숭실대학교 IT지원위원회 공지사항 알림 서비스를 이용해주셔서 감사드립니다.
-		`
+숭실대학교 IT지원위원회 공지사항 알림 서비스를 이용해주셔서 감사드립니다.
+`
 
 	for _, email := range emails {
 		subject := "[숭실대학교 공지사항 등록 알림] " + announcement.Title
 		body := fmt.Sprintf(
 			emailBodyTemplate,
+			announcement.Title,
 			announcement.Category,
 			announcement.Date,
 			announcement.Department,

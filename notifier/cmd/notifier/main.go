@@ -32,6 +32,8 @@ func handleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 			continue
 		}
 
+		log.Printf("Category: %s, Title: %s, Subscribers: %v", announcement.Category, announcement.Title, emails)
+
 		// 구독자들에게 이메일 알림 발송
 		err = service.SendEmail(cfg, emails, announcement)
 		if err != nil {
