@@ -34,7 +34,7 @@ jobs:
         run: |
           docker build -f eventworker/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }} ./eventworker
           docker push ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }}
-
+#
 #  deploy:
 #    name: Deploy to lambda
 #    runs-on: ubuntu-latest
