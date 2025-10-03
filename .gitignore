@@ -27,6 +27,7 @@ go.work.sum
 # env file
 scraper/.env
 eventworker/.env
+notifier/.env
 
 # Editor/IDE
 .idea/
