@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/joho/godotenv"
@@ -27,15 +26,7 @@ func LoadConfig() *AppConfig {
 	if err != nil {
 		log.Fatal("DynamoDB config error : " + err.Error())
 	}
-
-	var dynamoClient *dynamodb.Client
-	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
-		dynamoClient = dynamodb.NewFromConfig(cfg)
-	} else { // 로컬 환경의 경우, 로컬 DynamoDB 엔드포인트 사용 (docker compose로 컨테이너 실행해주세요)
-		dynamoClient = dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
-			o.BaseEndpoint = aws.String("http://localhost:8000")
-		})
-	}
+	dynamoClient := dynamodb.NewFromConfig(cfg)
 
 	return &AppConfig{
 		SSUAnnouncementURL: os.Getenv("SSU_ANNOUNCEMENT_URL"),
