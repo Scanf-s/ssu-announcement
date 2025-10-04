@@ -18,7 +18,7 @@ type AppConfig struct {
 
 func LoadConfig() *AppConfig {
 	if err := godotenv.Load(".env"); err != nil {
-		log.Println("Warning: .env file not found")
+		log.Println("It is running in AWS Lambda.. Skipping")
 	}
 
 	// DynamoDB 클라이언트
@@ -31,6 +31,6 @@ func LoadConfig() *AppConfig {
 	return &AppConfig{
 		SSUAnnouncementURL: os.Getenv("SSU_ANNOUNCEMENT_URL"),
 		DynamoDBClient:     dynamoClient,
-		DBTableName:        os.Getenv("DB_TABLE_NAME"),
+		DBTableName:        os.Getenv("ANNOUNCEMENT_DB_NAME"),
 	}
 }

@@ -33,5 +33,5 @@ notifier/.env
 .idea/
 .vscode/
 
-# SAM Template
-template.yaml
+# SAM
+.aws-sam

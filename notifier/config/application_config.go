@@ -48,6 +48,6 @@ func LoadConfig() *AppConfig {
 		SmtpPass:       smtpPass,
 		Auth:           auth,
 		DynamoDBClient: dynamoClient,
-		DBTableName:    os.Getenv("DB_TABLE_NAME"), // 사용자 구독 정보 저장 테이블 이름
+		DBTableName:    os.Getenv("SUBSCRIBE_DB_TABLE_NAME"), // 사용자 구독 정보 저장 테이블 이름
 	}
 }
