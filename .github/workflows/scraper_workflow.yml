@@ -33,7 +33,9 @@ jobs:
       - name: Build and Push to ECR
         run: |
           docker build -f scraper/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }} ./scraper
+          docker tag ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }} ${{ secrets.ECR_REPOSITORY }}:scraper-latest
           docker push ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }}
+          docker push ${{ secrets.ECR_REPOSITORY }}:scraper-latest
 
   deploy:
     name: Deploy to lambda

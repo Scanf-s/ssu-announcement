@@ -33,7 +33,9 @@ jobs:
       - name: Build and Push to ECR
         run: |
           docker build -f notifier/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:notifier-${{ github.sha }} ./notifier
+          docker tag ${{ secrets.ECR_REPOSITORY }}:notifier-${{ github.sha }} ${{ secrets.ECR_REPOSITORY }}:notifier-latest
           docker push ${{ secrets.ECR_REPOSITORY }}:notifier-${{ github.sha }}
+          docker push ${{ secrets.ECR_REPOSITORY }}:notifier-latest
 
   deploy:
     name: Deploy to lambda

@@ -33,7 +33,9 @@ jobs:
       - name: Build and Push to ECR
         run: |
           docker build -f eventworker/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }} ./eventworker
+          docker tag ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }} ${{ secrets.ECR_REPOSITORY }}:eventworker-latest
           docker push ${{ secrets.ECR_REPOSITORY }}:eventworker-${{ github.sha }}
+          docker push ${{ secrets.ECR_REPOSITORY }}:eventworker-latest
 
   deploy:
     name: Deploy to lambda

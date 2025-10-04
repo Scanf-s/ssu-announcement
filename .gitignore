@@ -32,3 +32,6 @@ notifier/.env
 # Editor/IDE
 .idea/
 .vscode/
+
+# SAM Template
+template.yaml
