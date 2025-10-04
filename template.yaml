@@ -202,33 +202,3 @@ Outputs:
     Value: !Ref SubscriptionTable
     Export:
       Name: !Sub '${AWS::StackName}-SubscriptionTable'
-
-  NotificationQueueURL:
-    Description: SQS queue URL for notifications
-    Value: !GetAtt NotificationQueue.QueueUrl
-    Export:
-      Name: !Sub '${AWS::StackName}-QueueURL'
-
-  NotificationQueueArn:
-    Description: SQS queue ARN for notifications
-    Value: !GetAtt NotificationQueue.Arn
-    Export:
-      Name: !Sub '${AWS::StackName}-QueueArn'
-
-#  ScraperFunctionArn:
-#    Description: Scraper Lambda function ARN
-#    Value: !GetAtt ScraperFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-ScraperFunctionArn'
-#
-#  EventWorkerFunctionArn:
-#    Description: EventWorker Lambda function ARN
-#    Value: !GetAtt EventWorkerFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-EventWorkerFunctionArn'
-#
-#  NotifierFunctionArn:
-#    Description: Notifier Lambda function ARN
-#    Value: !GetAtt NotifierFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-NotifierFunctionArn'
