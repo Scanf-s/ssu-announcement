@@ -130,7 +130,7 @@ Resources:
         ScheduleEvent:
           Type: Schedule
           Properties:
-            Schedule: cron(0 * ? * MON-FRI *)
+            Schedule: cron(0 */3 ? * MON-FRI *)
             Description: Scrape SSU announcements every hour
             Enabled: true
 
