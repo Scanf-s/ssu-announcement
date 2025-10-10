@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -14,7 +15,14 @@ import (
 )
 
 func main() {
-	lambda.Start(handleRequest)
+	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
+		lambda.Start(handleRequest)
+	} else {
+		// 로컬 환경에서 테스트용 코드
+		// 알아서 변경 가능
+		cfg := config.LoadConfig()
+		scraper.ScrapeSSUPathPrograms(cfg)
+	}
 }
 
 func handleRequest(ctx context.Context, event json.RawMessage) (string, error) {

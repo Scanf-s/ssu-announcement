@@ -12,8 +12,11 @@ import (
 
 type AppConfig struct {
 	SSUAnnouncementURL string
+	SSUPathURL         string
 	DynamoDBClient     *dynamodb.Client
 	DBTableName        string
+	SSUPathID          string
+	SSUPathPW          string
 }
 
 func LoadConfig() *AppConfig {
@@ -30,7 +33,10 @@ func LoadConfig() *AppConfig {
 
 	return &AppConfig{
 		SSUAnnouncementURL: os.Getenv("SSU_ANNOUNCEMENT_URL"),
+		SSUPathURL:         os.Getenv("SSU_PATH_URL"),
 		DynamoDBClient:     dynamoClient,
 		DBTableName:        os.Getenv("ANNOUNCEMENT_DB_NAME"),
+		SSUPathID:          os.Getenv("SSU_PATH_ID"),
+		SSUPathPW:          os.Getenv("SSU_PATH_PASSWORD"),
 	}
 }
