@@ -58,9 +58,18 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	chromeLauncher := cfg.ChromeLauncher
 
 	// 브라우저 실행
-	url := chromeLauncher.MustLaunch()
-	browser := rod.New().ControlURL(url).MustConnect()
-	defer browser.MustClose()
+	url, err := chromeLauncher.Launch()
+	if err != nil {
+		return err
+	}
+	browser := rod.New().ControlURL(url)
+	if err := browser.Connect(); err != nil {
+		return err
+	}
+	defer func() {
+		browser.Close()
+		// Chrome launcher cleanup은 자동으로 처리됨
+	}()
 
 	// SSU-Path 로그인 페이지 이동
 	page := browser.MustPage(cfg.SSUPathURL)

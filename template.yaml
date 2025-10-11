@@ -117,7 +117,7 @@ Resources:
       MemorySize: 1024  # Chrome 실행을 위해 1GB 할당
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref AnnouncementTableName
+            TableName: !Ref AnnouncementTable
         - Statement:
           - Effect: Allow
             Action:
@@ -151,7 +151,7 @@ Resources:
           SQS_QUEUE_URL: !GetAtt NotificationQueue.QueueUrl
       Policies:
         - DynamoDBStreamReadPolicy:
-            TableName: !Ref AnnouncementTableName
+            TableName: !Ref AnnouncementTable
             StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
         - SQSSendMessagePolicy:
             QueueName: !Ref QueueName
@@ -183,7 +183,7 @@ Resources:
           SMTP_PASSWORD: !Ref SMTPPassword
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref SubscriptionTableName
+            TableName: !Ref SubscriptionTable
         - SQSPollerPolicy:
             QueueName: !Ref QueueName
       Events:
