@@ -30,10 +30,11 @@ RUN dnf -y update && \
     alsa-lib \
     ipa-gothic-fonts \
     xdg-utils \
-    liberation-fonts
+    liberation-fonts > /dev/null 2>&1
 
 # Chrome 설치
-RUN dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
+    rpm install ./google-chrome-stable_current_x86_64.rpm || true && \
     mkdir -p /opt/chrome && \
     ln -s /usr/bin/google-chrome /opt/chrome/chrome
 
