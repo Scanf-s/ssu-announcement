@@ -30,7 +30,7 @@ func handleRequest(ctx context.Context, event json.RawMessage) (string, error) {
 	log.Println("Running in Lambda environment")
 
 	// 환경변수 불러오기
-	cfg := config.LoadConfig()
+	cfg := config.LoadConfig(ctx)
 
 	// errgroup 생성
 	g, gCtx := errgroup.WithContext(ctx)

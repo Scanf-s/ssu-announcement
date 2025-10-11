@@ -4,11 +4,6 @@ Description: SSU Announcement Notification Service - Serverless Application
 
 # Config, Secrets
 Parameters:
-  SSUAnnouncementURL:
-    Type: String
-    Description: URL for SSU announcement page
-    Default: https://scatch.ssu.ac.kr/%EA%B3%B5%EC%A7%80%EC%82%AC%ED%95%AD/
-
   AnnouncementTableName:
     Type: String
     Description: DynamoDB table name for announcements
@@ -119,13 +114,21 @@ Resources:
       PackageType: Image
       ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:scraper-latest'
       Timeout: 60
-      Environment:
-        Variables:
-          SSU_ANNOUNCEMENT_URL: !Ref SSUAnnouncementURL
-          ANNOUNCEMENT_DB_NAME: !Ref AnnouncementTableName
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref AnnouncementTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-path/*'
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource: '*'
       Events: # EventBridge 스케줄링 설정 (평일 중, 매시간마다 스크래핑 실행)
         ScheduleEvent:
           Type: Schedule
