@@ -33,9 +33,7 @@ RUN dnf -y update && \
     liberation-fonts
 
 # Chrome 설치
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
-    dnf install -y ./google-chrome-stable_current_x86_64.rpm && \
-    rm google-chrome-stable_current_x86_64.rpm && \
+RUN dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
     mkdir -p /opt/chrome && \
     ln -s /usr/bin/google-chrome /opt/chrome/chrome
 
