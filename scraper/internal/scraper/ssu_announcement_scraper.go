@@ -58,10 +58,12 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	chromeLauncher := cfg.ChromeLauncher
 
 	// 브라우저 실행
+	log.Println("Launch Chromium browser")
 	url, err := chromeLauncher.Launch()
 	if err != nil {
 		return err
 	}
+	log.Println("Get control url")
 	browser := rod.New().ControlURL(url)
 	if err := browser.Connect(); err != nil {
 		return err
@@ -72,6 +74,7 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	}()
 
 	// SSU-Path 로그인 페이지 이동
+	log.Println("Navigating to SSU-Path main page")
 	page := browser.MustPage(cfg.SSUPathURL)
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)
@@ -89,7 +92,7 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	}
 
 	// SSO 로그인 페이지로 이동
-	log.Println("Navigating to login page...")
+	log.Println("Navigating to login page")
 	page = page.MustNavigate(cfg.SSUPathURL + loginLink)
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)
@@ -105,7 +108,7 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	page.MustElement("#pwd").MustInput(cfg.SSUPathPW)
 
 	// SSO 로그인 버튼 클릭
-	log.Printf("Pressed login button...")
+	log.Printf("Pressed login button")
 	page.MustElement(".btn_login").MustClick()
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)

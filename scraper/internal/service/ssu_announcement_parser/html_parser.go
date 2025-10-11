@@ -49,7 +49,7 @@ func ParseSSUAnnouncementsHtml(html []byte) ([]dto.AnnouncementScrapedResult, er
 					announcementData = &data
 				}
 			} else {
-				log.Println("Skip unnecessary li tag")
+				return
 			}
 
 			if announcementData != nil {

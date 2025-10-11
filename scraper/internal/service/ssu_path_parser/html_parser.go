@@ -12,6 +12,7 @@ import (
 )
 
 func SSUPathHTMLParser(baseUrl string, targetHtml string) ([]dto.SSUPathScrapedResult, error) {
+	log.Println("SSUPathHTMLParser called")
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(targetHtml))
 	if err != nil {
 		return nil, err
