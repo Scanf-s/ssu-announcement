@@ -8,12 +8,12 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bootstrap ./cmd/scraper/ma
 FROM public.ecr.aws/lambda/provided:al2023 AS runtime
 
 # Chrome for Testing 설치
-RUN dnf install --assumeyes --quiet findutils jq unzip && \
+RUN dnf install -y -q findutils jq unzip && \
     dnf deplist https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
       | grep provider \
       | sort --unique \
       | awk '{print $2}' \
-      | xargs dnf install --best --allowerasing --skip-broken --assumeyes --quiet >& /dev/null && \
+      | xargs dnf install --best --allowerasing --skip-broken -y -q >& /dev/null && \
     export CHROME_FOR_TESTING_RELEASE="$(curl --silent https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq '.channels.Stable')" && \
     export CHROME_DOWNLOAD_URL="$(echo ""${CHROME_FOR_TESTING_RELEASE}"" | jq -r '.downloads.chrome[] | select(.platform == "linux64") | .url')" && \
     curl --remote-name --silent "${CHROME_DOWNLOAD_URL}" && \
