@@ -5,7 +5,6 @@ stack_name = "ssu-announcement"
 resolve_s3 = true
 s3_prefix = "ssu-announcement"
 region = "ap-northeast-2"
-confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "SSUAnnouncementURL=\"https://scatch.ssu.ac.kr/%EA%B3%B5%EC%A7%80%EC%82%AC%ED%95%AD/\" AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\" SMTPHost=\"smtp.gmail.com\" SMTPPort=\"587\""
+parameter_overrides = "AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\" SMTPHost=\"smtp.gmail.com\" SMTPPort=\"587\""
 image_repositories = []

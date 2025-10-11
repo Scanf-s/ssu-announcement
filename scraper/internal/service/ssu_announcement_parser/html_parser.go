@@ -16,7 +16,7 @@ import (
 // @param html []byte HTML 구조
 // @return []interface{} 공지사항 리스트
 // */
-func ParseSSUAnnouncementsHtml(html []byte) []dto.AnnouncementScrapedResult {
+func ParseSSUAnnouncementsHtml(html []byte) ([]dto.AnnouncementScrapedResult, error) {
 	// 오늘 날짜 정보
 	startDate := time.Now().AddDate(0, 0, -3).Format("2006.01.02")
 	endDate := time.Now().Format("2006.01.02")
@@ -25,7 +25,8 @@ func ParseSSUAnnouncementsHtml(html []byte) []dto.AnnouncementScrapedResult {
 	// 현재 HTML 구조
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(html)))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil, err
 	}
 
 	var result []dto.AnnouncementScrapedResult
@@ -48,7 +49,7 @@ func ParseSSUAnnouncementsHtml(html []byte) []dto.AnnouncementScrapedResult {
 					announcementData = &data
 				}
 			} else {
-				log.Println("Skip unnecessary li tag")
+				return
 			}
 
 			if announcementData != nil {
@@ -57,7 +58,7 @@ func ParseSSUAnnouncementsHtml(html []byte) []dto.AnnouncementScrapedResult {
 		})
 	})
 
-	return result
+	return result, nil
 }
 
 func parseDetails(date string, liTag *goquery.Selection) dto.AnnouncementScrapedResult {
@@ -68,11 +69,12 @@ func parseDetails(date string, liTag *goquery.Selection) dto.AnnouncementScraped
 	link := strings.TrimSpace(liTag.Find(".notice_col3").Find("a").AttrOr("href", ""))
 
 	return dto.AnnouncementScrapedResult{
-		Date:       date,
-		Status:     status,
-		Category:   category,
-		Title:      title,
-		Department: department,
-		Link:       link,
+		ScrapedDataType: "announcement",
+		Date:            date,
+		Status:          status,
+		Category:        category,
+		Title:           title,
+		Department:      department,
+		Link:            link,
 	}
 }

@@ -4,11 +4,6 @@ Description: SSU Announcement Notification Service - Serverless Application
 
 # Config, Secrets
 Parameters:
-  SSUAnnouncementURL:
-    Type: String
-    Description: URL for SSU announcement page
-    Default: https://scatch.ssu.ac.kr/%EA%B3%B5%EC%A7%80%EC%82%AC%ED%95%AD/
-
   AnnouncementTableName:
     Type: String
     Description: DynamoDB table name for announcements
@@ -118,19 +113,28 @@ Resources:
       FunctionName: ssu-announcement-scraper
       PackageType: Image
       ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:scraper-latest'
-      Timeout: 60
-      Environment:
-        Variables:
-          SSU_ANNOUNCEMENT_URL: !Ref SSUAnnouncementURL
-          ANNOUNCEMENT_DB_NAME: !Ref AnnouncementTableName
+      Timeout: 120
+      MemorySize: 2048  # Chrome 실행을 위해 2GB 할당
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref AnnouncementTableName
+            TableName: !Ref AnnouncementTable
+        - Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-path/*'
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource: '*'
       Events: # EventBridge 스케줄링 설정 (평일 중, 매시간마다 스크래핑 실행)
         ScheduleEvent:
           Type: Schedule
           Properties:
-            Schedule: cron(0 * ? * MON-FRI *)
+            Schedule: cron(0 */3 ? * MON-FRI *)
             Description: Scrape SSU announcements every hour
             Enabled: true
 
@@ -147,7 +151,7 @@ Resources:
           SQS_QUEUE_URL: !GetAtt NotificationQueue.QueueUrl
       Policies:
         - DynamoDBStreamReadPolicy:
-            TableName: !Ref AnnouncementTableName
+            TableName: !Ref AnnouncementTable
             StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
         - SQSSendMessagePolicy:
             QueueName: !Ref QueueName
@@ -179,7 +183,7 @@ Resources:
           SMTP_PASSWORD: !Ref SMTPPassword
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref SubscriptionTableName
+            TableName: !Ref SubscriptionTable
         - SQSPollerPolicy:
             QueueName: !Ref QueueName
       Events:
@@ -202,33 +206,3 @@ Outputs:
     Value: !Ref SubscriptionTable
     Export:
       Name: !Sub '${AWS::StackName}-SubscriptionTable'
-
-  NotificationQueueURL:
-    Description: SQS queue URL for notifications
-    Value: !GetAtt NotificationQueue.QueueUrl
-    Export:
-      Name: !Sub '${AWS::StackName}-QueueURL'
-
-  NotificationQueueArn:
-    Description: SQS queue ARN for notifications
-    Value: !GetAtt NotificationQueue.Arn
-    Export:
-      Name: !Sub '${AWS::StackName}-QueueArn'
-
-#  ScraperFunctionArn:
-#    Description: Scraper Lambda function ARN
-#    Value: !GetAtt ScraperFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-ScraperFunctionArn'
-#
-#  EventWorkerFunctionArn:
-#    Description: EventWorker Lambda function ARN
-#    Value: !GetAtt EventWorkerFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-EventWorkerFunctionArn'
-#
-#  NotifierFunctionArn:
-#    Description: Notifier Lambda function ARN
-#    Value: !GetAtt NotifierFunction.Arn
-#    Export:
-#      Name: !Sub '${AWS::StackName}-NotifierFunctionArn'
