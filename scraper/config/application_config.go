@@ -89,7 +89,7 @@ func LoadConfig(ctx context.Context) *AppConfig {
 	var chromeLauncher *launcher.Launcher
 	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		// Lambda 환경: Chrome 바이너리 경로 지정
-		chromePath := "/opt/chrome/chrome" // 컨테이너 내부 파일시스템에 설치된 Chrome 경로
+		chromePath := "/opt/chrome" // 컨테이너 내부 파일시스템에 설치된 Chrome 경로
 		chromeLauncher = launcher.New().
 			Bin(chromePath).
 			Headless(true).

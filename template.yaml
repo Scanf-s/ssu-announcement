@@ -114,7 +114,7 @@ Resources:
       PackageType: Image
       ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:scraper-latest'
       Timeout: 120
-      MemorySize: 1024  # Chrome 실행을 위해 1GB 할당
+      MemorySize: 2048  # Chrome 실행을 위해 2GB 할당
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref AnnouncementTable
