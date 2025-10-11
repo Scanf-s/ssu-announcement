@@ -1,74 +1,64 @@
 package scraper
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
-	"os"
+	"scraper/internal/repository"
+	"scraper/internal/service/ssu_announcement_parser"
 	"scraper/internal/service/ssu_path_parser"
 	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
-
 	"scraper/config"
+
+	"github.com/go-rod/rod"
 )
 
-func ScrapeSSUAnnouncements(cfg *config.AppConfig) []byte {
+func ScrapeSSUAnnouncements(ctx context.Context, cfg *config.AppConfig) error {
 	log.Println("Scraping SSU Announcements")
 
 	// Request 생성
 	request, err := http.NewRequest("GET", cfg.SSUAnnouncementURL, nil)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
-
-	// Request client
 	client := &http.Client{}
 
-	// Request 보내기
+	// Request 보내서 HTML 응답 받기
 	response, err := client.Do(request)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 	defer response.Body.Close()
 
 	// Response body 읽기
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
-	return body
+	// 공지사항 HTML 파싱해서 원하는 정보 추출
+	parsedResult, err := ssu_announcement_parser.ParseSSUAnnouncementsHtml(body)
+	if err != nil {
+		return err
+	}
+
+	// DynamoDB에 저장
+	err = repository.SaveScrapedData(ctx, cfg, parsedResult)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func ScrapeSSUPathPrograms(cfg *config.AppConfig) {
+func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	log.Println("Scraping SSU-Path Programs")
-
-	// Lambda 환경 감지 및 Chrome 경로 설정
-	var l *launcher.Launcher
-
-	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
-		// Lambda 환경: Chrome 바이너리 경로 지정
-		chromePath := "/opt/chrome/chrome" // 컨테이너 내부 파일시스템에 설치된 Chrome 경로
-		l = launcher.New().
-			Bin(chromePath).
-			Headless(true).
-			NoSandbox(true). // Lambda에서는 sandbox 모드 비활성화
-			Set("disable-gpu").
-			Set("disable-dev-shm-usage").
-			Set("disable-setuid-sandbox").
-			Set("no-first-run").
-			Set("no-zygote").
-			Set("single-process")
-	} else {
-		// 로컬 환경은 기본 설정 사용
-		l = launcher.New().
-			Headless(true)
-	}
+	chromeLauncher := cfg.ChromeLauncher
 
 	// 브라우저 실행
-	url := l.MustLaunch()
+	url := chromeLauncher.MustLaunch()
 	browser := rod.New().ControlURL(url).MustConnect()
 	defer browser.MustClose()
 
@@ -77,41 +67,41 @@ func ScrapeSSUPathPrograms(cfg *config.AppConfig) {
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)
 
-	// HTML 가져오기
+	// 로그인 페이지 HTML 가져오기
 	html, err := page.HTML()
 	if err != nil {
-		log.Printf("Failed to get HTML: %v", err)
+		return err
 	}
 
-	// 로그인 링크 가져오기
+	// 로그인 링크 획득
 	loginLink, err := ssu_path_parser.SSUPathLoginParser(html)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	// 로그인 페이지로 이동
+	// SSO 로그인 페이지로 이동
 	log.Println("Navigating to login page...")
 	page = page.MustNavigate(cfg.SSUPathURL + loginLink)
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)
 
-	// 로그인 페이지 HTML 가져오기
+	// SSO 로그인 페이지 HTML 가져오기
 	html, err = page.HTML()
 	if err != nil {
-		log.Printf("Failed to get HTML: %v", err)
+		return err
 	}
 
-	// 로그인 폼에 아이디, 비밀번호 입력 (실제학번, 비밀번호 필요)
+	// 로그인 폼에 아이디, 비밀번호 입력 (실제학번, 비밀번호 필요) -> 환경변수로 설정해주세요
 	page.MustElement("#userid").MustInput(cfg.SSUPathID)
 	page.MustElement("#pwd").MustInput(cfg.SSUPathPW)
 
-	// 로그인 버튼 클릭
+	// SSO 로그인 버튼 클릭
 	log.Printf("Pressed login button...")
 	page.MustElement(".btn_login").MustClick()
 	page.MustWaitLoad()
 	time.Sleep(10 * time.Second)
 
-	// 비교과 프로그램 페이지로 직접 이동
+	// 로그인 성공 -> 비교과 프로그램 페이지로 직접 이동
 	log.Printf("Navigating to non-curricular programs page...")
 	programsURL := cfg.SSUPathURL + "/ptfol/imng/icmpNsbjtPgm/findIcmpNsbjtPgmList.do"
 	page = page.MustNavigate(programsURL)
@@ -123,14 +113,24 @@ func ScrapeSSUPathPrograms(cfg *config.AppConfig) {
 	page.MustElement(".lica_wrap")
 	time.Sleep(5 * time.Second)
 
-	// 현재 페이지 HTML 가져오기
+	// 비교과 프로그램 목록 HTML 가져오기
 	html, err = page.HTML()
 	if err != nil {
-		log.Printf("Failed to get HTML: %v", err)
-		return
+		return err
 	}
 
+	// 비교과 프로그램 데이터 추출
 	log.Printf("Parsing SSU-Path Programs Page HTML...")
-	// 비교과 프로그램 데이터 파싱
-	ssu_path_parser.SSUPathHTMLParser(cfg.SSUPathURL, html)
+	scrapedResults, err := ssu_path_parser.SSUPathHTMLParser(cfg.SSUPathURL, html)
+	if err != nil {
+		return err
+	}
+
+	// DynamoDB에 저장
+	err = repository.SaveScrapedData(ctx, cfg, scrapedResults)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

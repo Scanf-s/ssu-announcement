@@ -6,22 +6,23 @@ import (
 	"log"
 	"os"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"scraper/config"
-	"scraper/internal/repository"
 	"scraper/internal/scraper"
-	"scraper/internal/service/ssu_announcement_parser"
 )
 
 func main() {
 	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		lambda.Start(handleRequest)
 	} else {
-		// 로컬 환경에서 테스트용 코드
-		// 알아서 변경 가능
-		cfg := config.LoadConfig()
-		scraper.ScrapeSSUPathPrograms(cfg)
+		// 로컬 환경에서 실행할 때는 빈 context 전달
+		_, err := handleRequest(context.Background(), nil)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
 	}
 }
 
@@ -31,15 +32,25 @@ func handleRequest(ctx context.Context, event json.RawMessage) (string, error) {
 	// 환경변수 불러오기
 	cfg := config.LoadConfig()
 
-	// 숭실대학교 공지사항 스크래핑
-	resultHtml := scraper.ScrapeSSUAnnouncements(cfg)
+	// errgroup 생성
+	g, gCtx := errgroup.WithContext(ctx)
 
-	// 공지사항 HTML 파싱해서 원하는 정보 추출
-	parsedResult := ssu_announcement_parser.ParseSSUAnnouncementsHtml(resultHtml)
-	log.Println(parsedResult)
+	// 숭실대학교 공지사항 스크래핑 작업
+	g.Go(func() error {
+		return scraper.ScrapeSSUAnnouncements(gCtx, cfg)
+	})
 
-	// DynamoDB에 저장
-	repository.SaveScrapedData(ctx, cfg, parsedResult)
+	// SSU-Path 프로그램 스크래핑 작업
+	g.Go(func() error {
+		return scraper.ScrapeSSUPathPrograms(gCtx, cfg)
+	})
 
+	// 모든 작업 완료 대기 (하나라도 실패하면 에러 반환)
+	if err := g.Wait(); err != nil {
+		log.Printf("Scraping failed: %v", err)
+		return "", err
+	}
+
+	log.Println("All scraping tasks completed successfully")
 	return "Success", nil
 }

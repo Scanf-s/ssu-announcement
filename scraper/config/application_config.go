@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/joho/godotenv"
 )
 
@@ -17,6 +18,7 @@ type AppConfig struct {
 	DBTableName        string
 	SSUPathID          string
 	SSUPathPW          string
+	ChromeLauncher     *launcher.Launcher
 }
 
 func LoadConfig() *AppConfig {
@@ -31,6 +33,26 @@ func LoadConfig() *AppConfig {
 	}
 	dynamoClient := dynamodb.NewFromConfig(cfg)
 
+	// Chrome 런처 설정
+	var chromeLauncher *launcher.Launcher
+	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
+		// Lambda 환경: Chrome 바이너리 경로 지정
+		chromePath := "/opt/chrome/chrome" // 컨테이너 내부 파일시스템에 설치된 Chrome 경로
+		chromeLauncher = launcher.New().
+			Bin(chromePath).
+			Headless(true).
+			NoSandbox(true). // Lambda에서는 sandbox 모드 비활성화
+			Set("disable-gpu").
+			Set("disable-dev-shm-usage").
+			Set("disable-setuid-sandbox").
+			Set("no-first-run").
+			Set("no-zygote").
+			Set("single-process")
+	} else {
+		// 로컬 환경은 기본 설정 사용
+		chromeLauncher = launcher.New().Headless(true)
+	}
+
 	return &AppConfig{
 		SSUAnnouncementURL: os.Getenv("SSU_ANNOUNCEMENT_URL"),
 		SSUPathURL:         os.Getenv("SSU_PATH_URL"),
@@ -38,5 +60,6 @@ func LoadConfig() *AppConfig {
 		DBTableName:        os.Getenv("ANNOUNCEMENT_DB_NAME"),
 		SSUPathID:          os.Getenv("SSU_PATH_ID"),
 		SSUPathPW:          os.Getenv("SSU_PATH_PASSWORD"),
+		ChromeLauncher:     chromeLauncher,
 	}
 }

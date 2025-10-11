@@ -5,39 +5,39 @@ import (
 	"errors"
 	"html"
 	"log"
+	"scraper/internal/dto"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-func SSUPathHTMLParser(baseUrl string, targetHtml string) {
+func SSUPathHTMLParser(baseUrl string, targetHtml string) ([]dto.SSUPathScrapedResult, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(targetHtml))
 	if err != nil {
-		log.Fatal("Error loading HTML: ", err)
+		return nil, err
 	}
-	log.Printf("Document loaded successfully")
 
 	// .lica_wrap 내부의 ul > li 순회 (바로 하위 li 태그들만 선택, 내부에 li태그가 또 있어서...)
+	var scrapedResults []dto.SSUPathScrapedResult
 	doc.Find(".lica_wrap > ul > li").Each(func(i int, liTag *goquery.Selection) {
-		imagePath, _ := liTag.Find(".img_wrap img#repnImg").Attr("src") // 이미지 경로
+		imagePath, _ := liTag.Find(".img_wrap img#repnImg").Attr("src")
 		imagePath = baseUrl + imagePath
 
-		label := strings.TrimSpace(liTag.Find(".text_wrap .label_box span").Text())            // 상태 라벨 (모집중, 종료)
-		major := strings.TrimSpace(liTag.Find(".text_wrap .major_type .first").Text())         // 전공
-		gradePointType := strings.TrimSpace(liTag.Find(".text_wrap .major_type .last").Text()) // 학점인정여부
-		title := strings.TrimSpace(liTag.Find(".text_wrap a.tit").Text())                      // 프로그램 제목
+		label := strings.TrimSpace(liTag.Find(".text_wrap .label_box span").Text())
+		department := strings.TrimSpace(liTag.Find(".text_wrap .major_type .first").Text())
+		gradePointType := strings.TrimSpace(liTag.Find(".text_wrap .major_type .last").Text())
+		title := strings.TrimSpace(liTag.Find(".text_wrap a.tit").Text())
+		description := strings.TrimSpace(liTag.Find(".text_wrap p.desc.ellipsis").Text()) // 설명 정보
 
 		// 상세 페이지 링크 추출
 		dataParams, _ := liTag.Find(".text_wrap a.tit").Attr("data-params")
 		announcementLink, err := extractDetailLink(dataParams, baseUrl)
 		if err != nil {
-			log.Println("Error extracting detail link: ", err)
+			log.Println(err)
 		}
 
-		description := strings.TrimSpace(liTag.Find(".text_wrap p.desc.ellipsis").Text()) // 설명 정보
-
 		// InfoWrap 정보 추출
-		var applicationPeriod, educationPeriod, applicationTarget, applicationStatus string
+		var applicationPeriod, educationPeriod, applicationTarget, applicationTargetStatus string
 		liTag.Find(".info_wrap dl").Each(func(j int, dlTag *goquery.Selection) {
 			dtText := strings.TrimSpace(dlTag.Find("dt").Text())
 			ddText := strings.TrimSpace(dlTag.Find("dd").Text())
@@ -50,7 +50,7 @@ func SSUPathHTMLParser(baseUrl string, targetHtml string) {
 			case "신청대상":
 				applicationTarget = ddText
 			case "신청신분":
-				applicationStatus = ddText
+				applicationTargetStatus = ddText
 			}
 		})
 
@@ -72,25 +72,28 @@ func SSUPathHTMLParser(baseUrl string, targetHtml string) {
 			}
 		})
 
-		// 결과 출력
-		log.Printf("========== Program #%d ==========", i+1)
-		log.Printf("Title: %s", title)
-		log.Printf("Status: %s", label)
-		log.Printf("Major: %s", major)
-		log.Printf("Type: %s", gradePointType)
-		log.Printf("Description: %s", description)
-		log.Printf("Image: %s", imagePath)
-		log.Printf("Link: %s", announcementLink)
-		log.Printf("Application Period: %s", applicationPeriod)
-		log.Printf("Education Period: %s", educationPeriod)
-		log.Printf("Target: %s", applicationTarget)
-		log.Printf("Status: %s", applicationStatus)
-		log.Printf("Mileage: %s", mileage)
-		log.Printf("Applicants: %s", applicants)
-		log.Printf("Waitlist: %s", waitlist)
-		log.Printf("Capacity: %s", capacity)
-		log.Println("=====================================")
+		// 데이터 구성 및 추가
+		scrapedResults = append(scrapedResults, dto.SSUPathScrapedResult{
+			ScrapedDataType:         "ssu_path",
+			Title:                   title,
+			Label:                   label,
+			Department:              department,
+			GradePointType:          gradePointType,
+			Description:             description,
+			Image:                   imagePath,
+			Link:                    announcementLink,
+			ApplicationPeriod:       applicationPeriod,
+			EducationPeriod:         educationPeriod,
+			ApplicationTarget:       applicationTarget,
+			ApplicationTargetStatus: applicationTargetStatus,
+			Mileage:                 mileage,
+			Applicants:              applicants,
+			Waitlist:                waitlist,
+			Capacity:                capacity,
+		})
 	})
+
+	return scrapedResults, nil
 }
 
 func extractDetailLink(dataParams string, baseUrl string) (string, error) {
