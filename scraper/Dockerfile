@@ -34,7 +34,7 @@ RUN dnf -y update && \
 
 # Chrome 설치
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
-    rpm install ./google-chrome-stable_current_x86_64.rpm || true && \
+    rpm install --quite ./google-chrome-stable_current_x86_64.rpm || true && \
     mkdir -p /opt/chrome && \
     ln -s /usr/bin/google-chrome /opt/chrome/chrome
 
