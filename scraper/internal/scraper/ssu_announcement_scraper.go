@@ -13,6 +13,7 @@ import (
 	"scraper/config"
 
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/proto"
 )
 
 func ScrapeSSUAnnouncements(ctx context.Context, cfg *config.AppConfig) error {
@@ -75,8 +76,13 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 
 	// SSU-Path 로그인 페이지 이동
 	log.Println("Navigating to SSU-Path main page")
-	page := browser.MustPage(cfg.SSUPathURL)
-	page.MustWaitLoad()
+	page, err := browser.Page(proto.TargetCreateTarget{URL: cfg.SSUPathURL})
+	if err != nil {
+		return err
+	}
+	if err := page.WaitLoad(); err != nil {
+		return err
+	}
 	time.Sleep(10 * time.Second)
 
 	// 로그인 페이지 HTML 가져오기
@@ -93,8 +99,12 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 
 	// SSO 로그인 페이지로 이동
 	log.Println("Navigating to login page")
-	page = page.MustNavigate(cfg.SSUPathURL + loginLink)
-	page.MustWaitLoad()
+	if err := page.Navigate(cfg.SSUPathURL + loginLink); err != nil {
+		return err
+	}
+	if err := page.WaitLoad(); err != nil {
+		return err
+	}
 	time.Sleep(10 * time.Second)
 
 	// SSO 로그인 페이지 HTML 가져오기
@@ -104,25 +114,52 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	}
 
 	// 로그인 폼에 아이디, 비밀번호 입력 (실제학번, 비밀번호 필요) -> 환경변수로 설정해주세요
-	page.MustElement("#userid").MustInput(cfg.SSUPathID)
-	page.MustElement("#pwd").MustInput(cfg.SSUPathPW)
+	useridElem, err := page.Element("#userid")
+	if err != nil {
+		return err
+	}
+	if err := useridElem.Input(cfg.SSUPathID); err != nil {
+		return err
+	}
+
+	pwdElem, err := page.Element("#pwd")
+	if err != nil {
+		return err
+	}
+	if err := pwdElem.Input(cfg.SSUPathPW); err != nil {
+		return err
+	}
 
 	// SSO 로그인 버튼 클릭
 	log.Printf("Pressed login button")
-	page.MustElement(".btn_login").MustClick()
-	page.MustWaitLoad()
+	loginBtn, err := page.Element(".btn_login")
+	if err != nil {
+		return err
+	}
+	if err := loginBtn.Click(); err != nil {
+		return err
+	}
+	if err := page.WaitLoad(); err != nil {
+		return err
+	}
 	time.Sleep(10 * time.Second)
 
 	// 로그인 성공 -> 비교과 프로그램 페이지로 직접 이동
 	log.Printf("Navigating to non-curricular programs page...")
 	programsURL := cfg.SSUPathURL + "/ptfol/imng/icmpNsbjtPgm/findIcmpNsbjtPgmList.do"
-	page = page.MustNavigate(programsURL)
-	page.MustWaitLoad()
+	if err := page.Navigate(programsURL); err != nil {
+		return err
+	}
+	if err := page.WaitLoad(); err != nil {
+		return err
+	}
 	time.Sleep(5 * time.Second)
 
 	// 프로그램 목록이 로드될 때까지 대기
 	log.Printf("Waiting for programs list to load...")
-	page.MustElement(".lica_wrap")
+	if _, err := page.Element(".lica_wrap"); err != nil {
+		return err
+	}
 	time.Sleep(5 * time.Second)
 
 	// 비교과 프로그램 목록 HTML 가져오기
