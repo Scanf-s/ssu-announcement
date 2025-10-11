@@ -136,7 +136,7 @@ func ScrapeSSUPathPrograms(ctx context.Context, cfg *config.AppConfig) error {
 	if err != nil {
 		return err
 	}
-	if err := loginBtn.Click(); err != nil {
+	if err := loginBtn.Click(proto.InputMouseButtonLeft, 1); err != nil {
 		return err
 	}
 	if err := page.WaitLoad(); err != nil {
