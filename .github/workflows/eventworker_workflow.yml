@@ -48,5 +48,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: Deploy to lambda
+        env:
+          EVENTWORKER_LAMBDA_FUNCTION_NAME: ${{ secrets.EVENTWORKER_LAMBDA_FUNCTION_NAME }}
         run: |
           make deploy-eventworker

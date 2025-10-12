@@ -1,3 +1,6 @@
+EVENTWORKER_LAMBDA_FUNCTION_NAME ?= asdf
+AWS_REGION ?= ap-northeast-2
+
 # Eventworker 빌드
 # -s -w 옵션 추가해서 디버깅 정보 제거하면 바이너리 크기가 줄어든다
 build-eventworker:
@@ -13,12 +16,11 @@ clean:
 	rm -f eventworker/eventworker.zip
 	@echo "Cleanup completed"
 
-
 # Eventworker 배포
 deploy-eventworker:
 	@echo "Deploying Eventworker service"
 	aws lambda update-function-code \
-	--function-name ${EVENTWORKER_LAMBDA_FUNCTION_NAME} \
+	--function-name $(EVENTWORKER_LAMBDA_FUNCTION_NAME) \
 	--zip-file fileb://eventworker/eventworker.zip \
-	--region ${AWS_REGION}
+	--region $(AWS_REGION)
 	@echo "Eventworker deployment completed"
