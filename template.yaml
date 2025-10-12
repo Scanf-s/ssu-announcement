@@ -143,8 +143,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ssu-announcement-eventworker
-      PackageType: Image
-      ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:eventworker-latest'
+      PackageType: Zip
+      Handler: bootstrap
+      Runtime: provided.al2023
+      CodeUri: ./eventworker/eventworker.zip
       Timeout: 30
       Environment:
         Variables:
@@ -164,35 +166,34 @@ Resources:
             BatchSize: 10
             MaximumBatchingWindowInSeconds: 0
             Enabled: true
-
-  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
-  NotifierFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ssu-announcement-notifier
-      PackageType: Image
-      ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:notifier-latest'
-      Timeout: 30
-      ReservedConcurrentExecutions: 5
-      Environment:
-        Variables:
-          SUBSCRIBE_DB_TABLE_NAME: !Ref SubscriptionTableName
-          SMTP_HOST: !Ref SMTPHost
-          SMTP_PORT: !Ref SMTPPort
-          SMTP_USER: !Ref SMTPUser
-          SMTP_PASSWORD: !Ref SMTPPassword
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref SubscriptionTable
-        - SQSPollerPolicy:
-            QueueName: !Ref QueueName
-      Events:
-        SQSEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt NotificationQueue.Arn
-            BatchSize: 1
-            Enabled: true
+#
+#  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
+#  NotifierFunction:
+#    Type: AWS::Serverless::Function
+#    Properties:
+#      FunctionName: ssu-announcement-notifier
+#      PackageType: Zip
+#      Timeout: 30
+#      ReservedConcurrentExecutions: 5
+#      Environment:
+#        Variables:
+#          SUBSCRIBE_DB_TABLE_NAME: !Ref SubscriptionTableName
+#          SMTP_HOST: !Ref SMTPHost
+#          SMTP_PORT: !Ref SMTPPort
+#          SMTP_USER: !Ref SMTPUser
+#          SMTP_PASSWORD: !Ref SMTPPassword
+#      Policies:
+#        - DynamoDBReadPolicy:
+#            TableName: !Ref SubscriptionTable
+#        - SQSPollerPolicy:
+#            QueueName: !Ref QueueName
+#      Events:
+#        SQSEvent:
+#          Type: SQS
+#          Properties:
+#            Queue: !GetAtt NotificationQueue.Arn
+#            BatchSize: 1
+#            Enabled: true
 
 Outputs:
   AnnouncementTableName:
