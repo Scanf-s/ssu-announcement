@@ -9,13 +9,6 @@ build-eventworker:
 	cd eventworker && zip eventworker.zip bootstrap
 	@echo "Eventworker build completed"
 
-# Clean
-clean:
-	@echo "Cleaning up"
-	rm -f eventworker/bootstrap
-	rm -f eventworker/eventworker.zip
-	@echo "Cleanup completed"
-
 # Eventworker 배포
 deploy-eventworker:
 	@echo "Deploying Eventworker service"
@@ -24,3 +17,10 @@ deploy-eventworker:
 	--zip-file fileb://eventworker/eventworker.zip \
 	--region $(AWS_REGION)
 	@echo "Eventworker deployment completed"
+
+# Eventworker 정리
+clean-eventworker:
+	@echo "Cleaning up"
+	rm -f eventworker/bootstrap
+	rm -f eventworker/eventworker.zip
+	@echo "Cleanup completed"
