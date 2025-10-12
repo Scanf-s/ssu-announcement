@@ -1,0 +1,42 @@
+name: notifier_workflow.yml
+on:
+  push:
+    branches: [ "notifier" ]
+
+jobs:
+
+  build-and-deploy:
+    name: Build and Deploy Notifier to AWS Lambda
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - name: Build notifier binary
+        run: |
+          make build-notifier
+
+      - name: Deploy to lambda
+        env:
+          NOTIFIER_LAMBDA_FUNCTION_NAME: ${{ secrets.NOTIFIER_LAMBDA_FUNCTION_NAME }}
+        run: |
+          make deploy-notifier
+
+      - name: Cleanup
+        run: |
+          make clean-notifier
