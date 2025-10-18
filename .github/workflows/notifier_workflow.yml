@@ -1,26 +1,26 @@
-#name: notifier_workflow.yml
-#on:
-#  push:
-#    branches: [ "notifier" ]
-#
-#jobs:
-#
-#  build-and-deploy:
-#    name: Build and Deploy Notifier to AWS Lambda
-#    runs-on: ubuntu-latest
-#    permissions:
-#      id-token: write
-#      contents: read
-#
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v5
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v5
-#        with:
-#          go-version: '1.25'
-#
+name: notifier_workflow.yml
+on:
+  push:
+    branches: [ "notifier" ]
+
+jobs:
+
+  build-and-deploy:
+    name: Build and Deploy Notifier to AWS Lambda
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
 #      - name: Configure AWS credentials using OIDC
 #        uses: aws-actions/configure-aws-credentials@v4
 #        with:

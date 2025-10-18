@@ -15,7 +15,7 @@ func handleRequest(ctx context.Context, event events.DynamoDBEvent) (string, err
 	log.Println("Event handler started")
 
 	// 환경변수 로드
-	cfg := config.LoadConfig()
+	cfg := config.LoadConfig(ctx)
 
 	// DynamoDB 스트림에서 새롭게 추가된 항목들만 SQS로 전달
 	for _, record := range event.Records {

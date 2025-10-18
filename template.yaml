@@ -138,35 +138,32 @@ Resources:
             Description: Scrape SSU announcements every hour
             Enabled: true
 
-#  # DynamoDB 스트림 -> SQS 전송해주는 람다함수
-#  EventWorkerFunction:
-#    Type: AWS::Serverless::Function
-#    Properties:
-#      FunctionName: ssu-announcement-eventworker
-#      PackageType: Zip
-#      Handler: bootstrap
-#      Runtime: provided.al2023
-#      CodeUri: ./eventworker/eventworker.zip
-#      Timeout: 30
-#      Environment:
-#        Variables:
-#          SQS_QUEUE_URL: !GetAtt NotificationQueue.QueueUrl
-#      Policies:
-#        - DynamoDBStreamReadPolicy:
-#            TableName: !Ref AnnouncementTable
-#            StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
-#        - SQSSendMessagePolicy:
-#            QueueName: !Ref QueueName
-#      Events:
-#        DynamoDBStream:
-#          Type: DynamoDB
-#          Properties:
-#            Stream: !GetAtt AnnouncementTable.StreamArn
-#            StartingPosition: LATEST
-#            BatchSize: 10
-#            MaximumBatchingWindowInSeconds: 0
-#            Enabled: true
-#
+  # DynamoDB 스트림 -> SQS 전송해주는 람다함수
+  EventWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-eventworker
+      PackageType: Zip
+      Handler: bootstrap
+      Runtime: provided.al2023
+      CodeUri: ./eventworker/eventworker.zip
+      Timeout: 30
+      Policies:
+        - DynamoDBStreamReadPolicy:
+            TableName: !Ref AnnouncementTable
+            StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
+        - SQSSendMessagePolicy:
+            QueueName: !Ref QueueName
+      Events:
+        DynamoDBStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt AnnouncementTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 0
+            Enabled: true
+
 #  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
 #  NotifierFunction:
 #    Type: AWS::Serverless::Function
