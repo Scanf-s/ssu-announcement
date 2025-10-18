@@ -134,6 +134,17 @@ Resources:
             StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
         - SQSSendMessagePolicy:
             QueueName: !Ref QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sqs/*'
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: '*'
       Events:
         DynamoDBStream:
           Type: DynamoDB
@@ -160,6 +171,18 @@ Resources:
             TableName: !Ref SubscriptionTable
         - SQSPollerPolicy:
             QueueName: !Ref QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sqs/*'
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: '*'
       Events:
         SQSEvent:
           Type: SQS
