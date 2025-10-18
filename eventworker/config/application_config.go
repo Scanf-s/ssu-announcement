@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/joho/godotenv"
 )
 
 type AppConfig struct {
@@ -18,10 +17,6 @@ type AppConfig struct {
 }
 
 func LoadConfig(ctx context.Context) *AppConfig {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("Warning: .env file not found")
-	}
-
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)

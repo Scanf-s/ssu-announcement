@@ -21,26 +21,26 @@
                 <!-- Content -->
                 <tr>
                     <td style="padding: 30px 20px;">
-                        <h2 style="margin: 0 0 20px 0; color: #333333; font-size: 20px; font-weight: bold;">%s</h2>
+                        <h2 style="margin: 0 0 20px 0; color: #333333; font-size: 20px; font-weight: bold;">{{.Title}}</h2>
 
                         <table role="presentation" style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057; width: 120px;">카테고리</td>
                                 <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">
-                                    <span style="display: inline-block; padding: 4px 12px; background-color: #0066cc; color: white; border-radius: 12px; font-size: 13px;">%s</span>
+                                    <span style="display: inline-block; padding: 4px 12px; background-color: #0066cc; color: white; border-radius: 12px; font-size: 13px;">{{.Category}}</span>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">등록일</td>
-                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">%s</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.Date}}</td>
                             </tr>
                             <tr>
                                 <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">등록부서</td>
-                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">%s</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.Department}}</td>
                             </tr>
                             <tr>
                                 <td style="padding: 12px; background-color: #f8f9fa; font-weight: bold; color: #495057;">진행상태</td>
-                                <td style="padding: 12px; background-color: #ffffff; color: #333333;">%s</td>
+                                <td style="padding: 12px; background-color: #ffffff; color: #333333;">{{.Status}}</td>
                             </tr>
                         </table>
 
@@ -48,7 +48,7 @@
                         <table role="presentation" style="width: 100%; margin-top: 30px;">
                             <tr>
                                 <td align="center">
-                                    <a href="%s" style="display: inline-block; padding: 14px 40px; background-color: #0066cc; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,102,204,0.3);">자세히 보기</a>
+                                    <a href="{{.Link}}" style="display: inline-block; padding: 14px 40px; background-color: #0066cc; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,102,204,0.3);">자세히 보기</a>
                                 </td>
                             </tr>
                         </table>

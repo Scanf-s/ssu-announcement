@@ -177,7 +177,7 @@ Resources:
                 - ssm:GetParameter
                 - ssm:GetParameters
               Resource:
-                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sqs/*'
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/smtp/*'
                 - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
             - Effect: Allow
               Action:
