@@ -20,12 +20,12 @@ func handleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 			var messageType = *message.MessageAttributes["MessageType"].StringValue
 			switch messageType {
 			case string(dto.MessageTypeAnnouncement):
-				err := service.SendEmail(ctx, cfg, message.Body, *message.MessageAttributes["Category"].StringValue)
+				err := service.NotificationService(ctx, cfg, message.Body, *message.MessageAttributes["Category"].StringValue)
 				if err != nil {
 					log.Printf("Error sending email: %v", err)
 				}
 			case string(dto.MessageTypeSSUPath):
-				err := service.SendEmail(ctx, cfg, message.Body, "ssu_path")
+				err := service.NotificationService(ctx, cfg, message.Body, "ssu_path")
 				if err != nil {
 					log.Printf("Error sending email: %v", err)
 				}
