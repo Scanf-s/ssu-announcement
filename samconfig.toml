@@ -6,5 +6,5 @@ resolve_s3 = true
 s3_prefix = "ssu-announcement"
 region = "ap-northeast-2"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\" SMTPHost=\"smtp.gmail.com\" SMTPPort=\"587\""
+parameter_overrides = "AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\""
 image_repositories = []

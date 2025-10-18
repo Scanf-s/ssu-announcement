@@ -20,6 +20,7 @@ func SendEmail(ctx context.Context, cfg *config.AppConfig, body string, category
 	}
 
 	// TODO : 이메일 템플릿을 internal/template에서 embed된 파일 읽어서 사용하도록 구성해야함
+	log.Printf("Body : %s", body)
 
 	return nil
 }

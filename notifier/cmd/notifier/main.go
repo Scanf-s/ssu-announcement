@@ -12,7 +12,7 @@ import (
 )
 
 func handleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
-	cfg := config.LoadConfig()
+	cfg := config.LoadConfig(ctx)
 
 	// SQS 이벤트 처리 로직
 	for _, message := range sqsEvent.Records {

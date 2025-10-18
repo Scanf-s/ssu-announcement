@@ -35,3 +35,8 @@ notifier/.env
 
 # SAM
 .aws-sam
+
+# Build artifacts
+bootstrap
+notifier.zip
+eventworker.zip

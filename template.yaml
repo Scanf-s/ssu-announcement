@@ -16,28 +16,8 @@ Parameters:
 
   QueueName:
     Type: String
-    Description: SQS queue name for notifications
+    Description: SQS queue name for application
     Default: ssu-notification-queue
-
-  SMTPHost:
-    Type: String
-    Description: SMTP host for email sending (...@gmail.com)
-    Default: smtp.gmail.com
-
-  SMTPPort:
-    Type: String
-    Description: SMTP port
-    Default: '587'
-
-  SMTPUser:
-    Type: String
-    Description: SMTP user email
-    NoEcho: true
-
-  SMTPPassword:
-    Type: String
-    Description: SMTP password (Gmail app password not login password)
-    NoEcho: true
 
 # Lambda 기본값 설정
 Globals:
@@ -164,33 +144,29 @@ Resources:
             MaximumBatchingWindowInSeconds: 0
             Enabled: true
 
-#  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
-#  NotifierFunction:
-#    Type: AWS::Serverless::Function
-#    Properties:
-#      FunctionName: ssu-announcement-notifier
-#      PackageType: Zip
-#      Timeout: 30
-#      ReservedConcurrentExecutions: 5
-#      Environment:
-#        Variables:
-#          SUBSCRIBE_DB_TABLE_NAME: !Ref SubscriptionTableName
-#          SMTP_HOST: !Ref SMTPHost
-#          SMTP_PORT: !Ref SMTPPort
-#          SMTP_USER: !Ref SMTPUser
-#          SMTP_PASSWORD: !Ref SMTPPassword
-#      Policies:
-#        - DynamoDBReadPolicy:
-#            TableName: !Ref SubscriptionTable
-#        - SQSPollerPolicy:
-#            QueueName: !Ref QueueName
-#      Events:
-#        SQSEvent:
-#          Type: SQS
-#          Properties:
-#            Queue: !GetAtt NotificationQueue.Arn
-#            BatchSize: 1
-#            Enabled: true
+  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
+  NotifierFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-notifier
+      PackageType: Zip
+      Timeout: 30
+      Handler: bootstrap
+      Runtime: provided.al2023
+      CodeUri: ./notifier/notifier.zip
+      ReservedConcurrentExecutions: 5
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SubscriptionTable
+        - SQSPollerPolicy:
+            QueueName: !Ref QueueName
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt NotificationQueue.Arn
+            BatchSize: 1
+            Enabled: true
 
 Outputs:
   AnnouncementTableName:
