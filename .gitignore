@@ -32,3 +32,11 @@ notifier/.env
 # Editor/IDE
 .idea/
 .vscode/
+
+# SAM
+.aws-sam
+
+# Build artifacts
+bootstrap
+notifier.zip
+eventworker.zip

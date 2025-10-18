@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숭실대학교 SSU·Path 프로그램 알림</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f4f4f4;">
+<table role="presentation" style="width: 100%; background-color: #f4f4f4; padding: 20px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <!-- Header -->
+                <tr>
+                    <td style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); padding: 30px 20px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">🎓 SSU·Path 프로그램 알림</h1>
+                        <p style="margin: 10px 0 0 0; color: #d4f1dd; font-size: 14px;">숭실대학교 IT지원위원회 공지사항 알림 서비스</p>
+                    </td>
+                </tr>
+
+                <!-- Image (if available) -->
+                {{if .Image}}
+                <tr>
+                    <td>
+                        <img src="{{.Image}}" alt="프로그램 이미지" style="width: 100%; max-height: 300px; object-fit: cover;">
+                    </td>
+                </tr>
+                {{end}}
+
+                <!-- Content -->
+                <tr>
+                    <td style="padding: 30px 20px;">
+                        <h2 style="margin: 0 0 10px 0; color: #333333; font-size: 20px; font-weight: bold;">{{.Title}}</h2>
+                        <p style="margin: 0 0 20px 0; color: #666666; font-size: 14px; line-height: 1.6;">{{.Description}}</p>
+
+                        <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057; width: 140px;">모집상태</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">
+                                    <span style="display: inline-block; padding: 4px 12px; background-color: #0066cc; color: white; border-radius: 12px; font-size: 13px;">{{.Label}}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">개설학과/부서</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.Department}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">학점인정여부</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.GradePointType}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">신청기간</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.ApplicationPeriod}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">교육기간</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.EducationPeriod}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">신청대상</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.ApplicationTarget}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">신청신분</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.ApplicationTargetStatus}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; border-bottom: 1px solid #e9ecef; font-weight: bold; color: #495057;">마일리지</td>
+                                <td style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e9ecef; color: #333333;">{{.Mileage}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; background-color: #f8f9fa; font-weight: bold; color: #495057;">지원현황</td>
+                                <td style="padding: 12px; background-color: #ffffff; color: #333333;">신청: {{.Applicants}}명 | 대기: {{.Waitlist}}명 | 정원: {{.Capacity}}명</td>
+                            </tr>
+                        </table>
+
+                        <!-- Button -->
+                        <table role="presentation" style="width: 100%;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{.Link}}" style="display: inline-block; padding: 14px 40px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(40,167,69,0.3);">프로그램 자세히 보기 →</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
+                        <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 13px;">숭실대학교 IT지원위원회 공지사항 알림 서비스</p>
+                        <p style="margin: 0; color: #adb5bd; font-size: 12px;">이메일 수신을 원하지 않으시면 <a href="https://www.google.com">구독</a>을 해지해주세요.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

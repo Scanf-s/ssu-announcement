@@ -32,8 +32,8 @@ jobs:
 
       - name: Build and Push to ECR
         run: |
-          docker build -f scraper/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }} ./scraper
-          docker push ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }}
+          docker build -f scraper/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:scraper-latest ./scraper
+          docker push ${{ secrets.ECR_REPOSITORY }}:scraper-latest
 
   deploy:
     name: Deploy to lambda
@@ -58,4 +58,4 @@ jobs:
         run: |
             aws lambda update-function-code \
             --function-name ${{ secrets.SCRAPER_LAMBDA_FUNCTION_NAME }} \
-            --image-uri ${{ secrets.ECR_REPOSITORY }}:scraper-${{ github.sha }}
+            --image-uri ${{ secrets.ECR_REPOSITORY }}:scraper-latest

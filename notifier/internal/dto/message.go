@@ -9,23 +9,28 @@ const (
 
 type Message interface {
 	GetLink() string
+	GetTitle() string
 	GetMessageType() MessageType
 }
 
 type AnnouncementMessage struct {
-	Link       string
-	Category   string
-	Title      string
-	Date       string
-	Department string
-	Status     string
+	Link       string // 공지사항 링크
+	Category   string // 카테고리
+	Title      string // 제목
+	Date       string // 작성일
+	Department string // 등록부서
+	Status     string // 상태
 }
 
-func (msg AnnouncementMessage) GetLink() string {
-	return msg.Link
+func (a AnnouncementMessage) GetLink() string {
+	return a.Link
 }
 
-func (msg AnnouncementMessage) GetMessageType() MessageType {
+func (a AnnouncementMessage) GetTitle() string {
+	return a.Title
+}
+
+func (a AnnouncementMessage) GetMessageType() MessageType {
 	return MessageTypeAnnouncement
 }
 
@@ -47,10 +52,14 @@ type SSUPathMessage struct {
 	Capacity                string
 }
 
-func (msg SSUPathMessage) GetLink() string {
-	return msg.Link
+func (s SSUPathMessage) GetLink() string {
+	return s.Link
 }
 
-func (msg SSUPathMessage) GetMessageType() MessageType {
+func (s SSUPathMessage) GetTitle() string {
+	return s.Title
+}
+
+func (s SSUPathMessage) GetMessageType() MessageType {
 	return MessageTypeSSUPath
 }

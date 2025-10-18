@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SSU Announcement Notification Service - Serverless Application
+
+# Config, Secrets
+Parameters:
+  AnnouncementTableName:
+    Type: String
+    Description: DynamoDB table name for announcements
+    Default: ssu-announcements
+
+  SubscriptionTableName:
+    Type: String
+    Description: DynamoDB table name for subscriptions
+    Default: ssu-subscriptions
+
+  QueueName:
+    Type: String
+    Description: SQS queue name for application
+    Default: ssu-notification-queue
+
+# Lambda 기본값 설정
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    Timeout: 30 # 메일 전송 딜레이 고려해서 충분히 설정
+    MemorySize: 128
+
+# Serverless Applicaiton 정의
+Resources:
+
+  # 스크래핑 결과 저장 테이블
+  AnnouncementTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref AnnouncementTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: Link # PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Link
+          KeyType: HASH
+      StreamSpecification: # Lambda 트리거용 스트림 활성화 (새롭게 추가된 항목들에 대해서만 스트리밍)
+        StreamViewType: NEW_IMAGE
+      Tags:
+        - Key: Name
+          Value: !Ref AnnouncementTableName
+
+  # 구독자 정보 저장 테이블
+  SubscriptionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref SubscriptionTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: Email # PK
+          AttributeType: S
+        - AttributeName: Category # SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Email
+          KeyType: HASH
+        - AttributeName: Category
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: CategoryIndex # 카테고리별 구독자 조회용 GSI
+          KeySchema:
+            - AttributeName: Category
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Name
+          Value: !Ref SubscriptionTableName
+
+  # SQS 큐 (공지 알림용)
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref QueueName
+      VisibilityTimeout: 180
+      MessageRetentionPeriod: 345600
+      Tags:
+        - Key: Name
+          Value: !Ref QueueName
+
+  # 스크래핑 람다 함수
+  ScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-scraper
+      PackageType: Image
+      ImageUri: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ssu-announcement:scraper-latest'
+      Timeout: 120
+      MemorySize: 2048  # Chrome 실행을 위해 2GB 할당
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AnnouncementTable
+        - Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-path/*'
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource: '*'
+      Events: # EventBridge 스케줄링 설정 (평일 중, 매시간마다 스크래핑 실행)
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 */3 ? * MON-FRI *)
+            Description: Scrape SSU announcements every hour
+            Enabled: true
+
+  # DynamoDB 스트림 -> SQS 전송해주는 람다함수
+  EventWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-eventworker
+      PackageType: Zip
+      Handler: bootstrap
+      Runtime: provided.al2023
+      CodeUri: ./eventworker/eventworker.zip
+      Timeout: 30
+      Policies:
+        - DynamoDBStreamReadPolicy:
+            TableName: !Ref AnnouncementTable
+            StreamName: !Select [3, !Split ["/", !GetAtt AnnouncementTable.StreamArn]]
+        - SQSSendMessagePolicy:
+            QueueName: !Ref QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/sqs/*'
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: '*'
+      Events:
+        DynamoDBStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt AnnouncementTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 0
+            Enabled: true
+
+  # SQS에서 작업 꺼내와서 구독자들에게 메일 발송하는 람다함수
+  NotifierFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-notifier
+      PackageType: Zip
+      Timeout: 30
+      Handler: bootstrap
+      Runtime: provided.al2023
+      CodeUri: ./notifier/notifier.zip
+      ReservedConcurrentExecutions: 5
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SubscriptionTable
+        - SQSPollerPolicy:
+            QueueName: !Ref QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/smtp/*'
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: '*'
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt NotificationQueue.Arn
+            BatchSize: 1
+            Enabled: true
+
+Outputs:
+  AnnouncementTableName:
+    Description: DynamoDB table for announcements
+    Value: !Ref AnnouncementTable
+    Export:
+      Name: !Sub '${AWS::StackName}-AnnouncementTable'
+
+  SubscriptionTableName:
+    Description: DynamoDB table for subscriptions
+    Value: !Ref SubscriptionTable
+    Export:
+      Name: !Sub '${AWS::StackName}-SubscriptionTable'

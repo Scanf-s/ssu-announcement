@@ -3,67 +3,49 @@ package service
 import (
 	"fmt"
 	"log"
-	"net/smtp"
-	"notifier/internal/dto"
-
 	"notifier/config"
+
+	"gopkg.in/gomail.v2"
 )
 
-func SendEmail(cfg *config.AppConfig, emails []string, announcement dto.Announcement) error {
-	// 구독자가 없으면 빠르게 반환
-	if len(emails) == 0 {
-		log.Printf("No subscribers for category: %s", announcement.Category)
-		return nil
+func SendEmail(cfg *config.AppConfig, emails []string, body string, category string) error {
+
+	dialer := gomail.NewDialer(cfg.SmtpHost, 587, cfg.SmtpUser, cfg.SmtpPass)
+	server, err := dialer.Dial()
+	if err != nil {
+		return err
+	}
+	defer server.Close()
+
+	successCount := 0
+	subject := getEmailSubject(category)
+	message := gomail.NewMessage()
+	for _, email := range emails {
+		message.SetHeader("From", cfg.SmtpUser)
+		message.SetAddressHeader("To", email, "")
+		message.SetHeader("Subject", subject)
+		message.SetBody("text/html", body)
+
+		if err = gomail.Send(server, message); err != nil {
+			log.Printf("Failed to send email to %s: %v", email, err)
+		} else {
+			successCount++
+			log.Printf("Email sent successfully to %s", email)
+		}
+		message.Reset() // 다음 이메일을 위해 메시지 초기화
 	}
 
-	// 이메일 발송 로직
-	emailBodyTemplate :=
-		`
-안녕하세요 숭실대학교 공지사항 알림 서비스입니다.
-제목: %s
-카테고리: %s
-등록일자: %s
-등록부서: %s
-상세링크: %s
-진행상태: %s
-
-숭실대학교 IT지원위원회 공지사항 알림 서비스를 이용해주셔서 감사드립니다.
-`
-
-	for _, email := range emails {
-		subject := "[숭실대학교 공지사항 등록 알림] " + announcement.Title
-		body := fmt.Sprintf(
-			emailBodyTemplate,
-			announcement.Title,
-			announcement.Category,
-			announcement.Date,
-			announcement.Department,
-			announcement.Link,
-			announcement.Status,
-		)
-
-		// 이메일 메시지 헤더
-		msg := []byte(
-			"From: " + cfg.SmtpUser + "\r\n" +
-				"To: " + email + "\r\n" +
-				"Subject: " + subject + "\r\n" +
-				"\r\n" +
-				body + "\r\n",
-		)
-
-		err := smtp.SendMail(
-			cfg.SmtpHost+":"+cfg.SmtpPort,
-			cfg.Auth,
-			cfg.SmtpUser,
-			[]string{email},
-			msg,
-		)
-		if err != nil {
-			log.Printf("Failed to send email to %s: %v", email, err)
-			continue
-		}
-		log.Printf("Email sent successfully to %s", email)
+	if successCount == 0 {
+		return fmt.Errorf("failed to send email to all subscribers")
 	}
 
 	return nil
+}
+
+func getEmailSubject(category string) string {
+	if category == "ssu_path" {
+		return "[숭실대학교 IT지원위원회] 신규 SSU_PATH 비교과 프로그램 등록 알림"
+	} else {
+		return "[숭실대학교 IT지원위원회] 신규 숭실대학교 공지사항 등록 알림"
+	}
 }

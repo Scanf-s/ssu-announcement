@@ -128,7 +128,8 @@ AWS_REGION=ap-northeast-2
    - AmazonEC2ContainerRegistryFullAccess
    - AWSLambda_FullAccess
    - AWSLambdaDynamoDBExecutionRole
-   - 신뢰관계 설정은 아래처럼 설정 (브랜치, 레포지토리, AWS ARN 수정해야함)
+   - AWSAPIGatewayAdministrator
+   - 신뢰관계 설정은 아래 참고 or 알아서 선언 (브랜치, 레포지토리, AWS ARN 수정해야함)
     ```json 
     {
         "Version": "2012-10-17",
@@ -180,33 +181,18 @@ AWS_REGION=ap-northeast-2
 2. **AWS IAM에서 ID제공업체** 생성 (GitHub Actions 배포용 OIDC 생성)
 3. **Gmail 앱 비밀번호** 생성
 4. **ECR 레포지토리** 생성 (Docker 이미지 저장용)
-5. **DynamoDB 테이블** 생성
-   - 공지사항 저장 테이블
-     - 파티션 키: `Link` (String)
-     - 스트림 활성화: 새 이미지 포함 (INSERT)
-   - 구독자 관리 테이블
-     - 파티션 키: `UserId` (String)
-     - GSI: `CategoryIndex`
-       - 파티션 키: `Category` (String)
-6. **SQS 큐** 생성
-   - Standard 타입
-   - 기본 설정 사용
-7. **EventBridge 규칙** 생성
-   - 일정: 1시간마다 실행되도록 구성 (cron(0 * * * ? *))
-   - 또는 원하는대로 수정하세요
-8. **Lambda 함수** 생성
-   - 런타임: AL2023 (Go 어쩌구저쩌구 써져있음)
-   - 역할: 위에서 생성한 IAM 역할 지정
-   - 타임아웃: (무조건 설정해야함)
-     - Scraper: 60초
-     - EventWorker: 30초
-     - Notifier: 30초
-   - 메모리: 기본값 (128MB)
-   - 환경 변수 설정 (각 모듈별로 환경 변수 참고)
-   - 트리거 설정은 위 아키텍쳐 확인해서 설정해주세요
+5. **Github Actions** 돌려서 이미지 배포
+   - `.github/workflows 참고
+6. **AWS SAM CLI** 설치
+7. 서버리스 리소스 배포
+```bash
+sam build
+sam deploy --guided
+```
+
 ---
 
-## 백엔드 배포
+## 백엔드 이미지 배포
 
 ### GitHub Actions 자동 배포
 
@@ -239,25 +225,7 @@ NOTIFIER_LAMBDA_FUNCTION_NAME=알림처리람다함수이름
 **CloudWatch Logs:**
 - CloudWatch -> Logs -> 로그 그룹 선택 -> 각 람다 함수 이름으로 된 로그그룹 선택해서 로그 확인 가능
 
-### 2. SQS 모니터링
-
-```bash
-# 큐에 쌓인 메시지 개수 확인
-aws sqs get-queue-attributes \
-    --queue-url https://sqs.ap-northeast-2.amazonaws.com/ACCOUNT_ID/큐이름 \
-    --attribute-names ApproximateNumberOfMessages
-
-# 메시지 확인 (삭제 안됨)
-aws sqs receive-message \
-    --queue-url https://sqs.ap-northeast-2.amazonaws.com/ACCOUNT_ID/큐이름 \
-    --max-number-of-messages 10
-
-# 큐 비우기 (문제 발생 시)
-aws sqs purge-queue \
-    --queue-url https://sqs.ap-northeast-2.amazonaws.com/ACCOUNT_ID/큐이름
-```
-
-### 3. DynamoDB 데이터 확인
+### 2. DynamoDB 데이터 확인
 
 - AWS Console: DynamoDB → 테이블 선택 → 항목 탐색 -> 데이터베이스 테이블 선택 -> 스캔 or 쿼리해서 데이터 확인
 ---

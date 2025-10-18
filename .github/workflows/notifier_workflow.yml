@@ -1,12 +1,12 @@
-name: eventworker_workflow.yml
+name: notifier_workflow.yml
 on:
   push:
-    branches: [ "eventworker" ]
+    branches: [ "notifier" ]
 
 jobs:
 
   build-and-deploy:
-    name: Build and Deploy Eventworker to AWS Lambda
+    name: Build and Deploy Notifier to AWS Lambda
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -27,16 +27,16 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ap-northeast-2
 
-      - name: Build event worker binary
+      - name: Build notifier binary
         run: |
-          make build-eventworker
+          make build-notifier
 
       - name: Deploy to lambda
         env:
-          EVENTWORKER_LAMBDA_FUNCTION_NAME: ${{ secrets.EVENTWORKER_LAMBDA_FUNCTION_NAME }}
+          NOTIFIER_LAMBDA_FUNCTION_NAME: ${{ secrets.NOTIFIER_LAMBDA_FUNCTION_NAME }}
         run: |
-          make deploy-eventworker
+          make deploy-notifier
 
       - name: Cleanup
         run: |
-          make clean-eventworker
+          make clean-notifier
