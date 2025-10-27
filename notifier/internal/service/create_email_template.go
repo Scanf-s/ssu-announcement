@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"notifier/internal/dto"
 
@@ -16,22 +15,22 @@ var announcementTemplate string
 //go:embed template/ssu_path_template.html
 var ssuPathTemplate string
 
-func CreateEmailTemplate(category string, data string) (string, error) {
+func CreateEmailTemplate(category string, data dto.Message) (string, error) {
 	var rawTemplate string
 	var templateData interface{}
 
 	if category == "ssu_path" {
 		rawTemplate = ssuPathTemplate
-		var ssuPathData dto.SSUPathMessage
-		if err := json.Unmarshal([]byte(data), &ssuPathData); err != nil {
-			return "", fmt.Errorf("failed to unmarshal SSUPath data: %w", err)
+		ssuPathData, ok := data.(dto.SSUPathMessage)
+		if !ok {
+			return "", fmt.Errorf("failed to cast data to SSUPathMessage")
 		}
 		templateData = ssuPathData
 	} else { // 다른 카테고리는 숭실대학교 공지사항 데이터로 취급
 		rawTemplate = announcementTemplate
-		var announcementData dto.AnnouncementMessage
-		if err := json.Unmarshal([]byte(data), &announcementData); err != nil {
-			return "", fmt.Errorf("failed to unmarshal Announcement data: %w", err)
+		announcementData, ok := data.(dto.AnnouncementMessage)
+		if !ok {
+			return "", fmt.Errorf("failed to cast data to AnnouncementMessage")
 		}
 		templateData = announcementData
 	}

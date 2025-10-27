@@ -8,7 +8,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendEmail(cfg *config.AppConfig, emails []string, body string, category string) error {
+func SendEmail(cfg *config.AppConfig, emails []string, body string, subject string) error {
 
 	dialer := gomail.NewDialer(cfg.SmtpHost, 587, cfg.SmtpUser, cfg.SmtpPass)
 	server, err := dialer.Dial()
@@ -18,7 +18,6 @@ func SendEmail(cfg *config.AppConfig, emails []string, body string, category str
 	defer server.Close()
 
 	successCount := 0
-	subject := getEmailSubject(category)
 	message := gomail.NewMessage()
 	for _, email := range emails {
 		message.SetHeader("From", cfg.SmtpUser)
@@ -40,12 +39,4 @@ func SendEmail(cfg *config.AppConfig, emails []string, body string, category str
 	}
 
 	return nil
-}
-
-func getEmailSubject(category string) string {
-	if category == "ssu_path" {
-		return "[숭실대학교 IT지원위원회] 신규 SSU_PATH 비교과 프로그램 등록 알림"
-	} else {
-		return "[숭실대학교 IT지원위원회] 신규 숭실대학교 공지사항 등록 알림"
-	}
 }
