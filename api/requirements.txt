@@ -1,0 +1,6 @@
+# AWS Lambda Runtime
+# Python 3.12 standard library is sufficient for basic Lambda handler
+
+# Optional: Add dependencies as needed
+# boto3==1.34.* # AWS SDK (already included in Lambda runtime)
+# aws-lambda-powertools==2.* # For structured logging and tracing

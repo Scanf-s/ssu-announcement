@@ -40,3 +40,7 @@ notifier/.env
 bootstrap
 notifier.zip
 eventworker.zip
+
+# Environment vars
+.env
+**/.env

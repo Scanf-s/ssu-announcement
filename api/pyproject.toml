@@ -1,0 +1,9 @@
+[project]
+name = "ssu-announcement-api"
+version = "0.1.0"
+description = "This API handler is for ssu announcement"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.40.65",
+]
