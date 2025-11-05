@@ -44,3 +44,6 @@ eventworker.zip
 # Environment vars
 .env
 **/.env
+
+# Python
+**/__pycache__/**

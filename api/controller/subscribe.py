@@ -1,11 +1,12 @@
 """
 Subscribe endpoints handler
 """
+
 import os
 from typing import Any, Dict, Optional
 
-from api.utils.error import SubscriptionNotFound
 from api.repository.subscription_repository import repo
+from api.utils.error import SubscriptionNotFound
 
 
 def get_subscribes(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
@@ -24,4 +25,3 @@ def get_subscribes(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
         raise SubscriptionNotFound(email)
 
     return {"subscribes": subscribes}
-

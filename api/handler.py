@@ -1,10 +1,11 @@
-from typing import Dict, Any, Tuple, Callable, List
-from api.controller import subscribe, healthcheck
-from api.utils.error import SubscriptionNotFound
-from api.utils.response import success_response, error_response
+import logging
+from typing import Any, Callable, Dict, List, Tuple
 
 import boto3
-import logging
+
+from api.controller import healthcheck, subscribe
+from api.utils.error import SubscriptionNotFound
+from api.utils.response import error_response, success_response
 
 logger = logging.getLogger("[SSU_ANNOUNCEMENT_API_HANDLER]")
 
@@ -34,7 +35,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return error_response(404, "Route not found")
 
         # 3. DynamoDB 클라이언트 생성
-        dynamodb: Any = boto3.resource('dynamodb')
+        dynamodb: Any = boto3.resource("dynamodb", region_name="ap-northeast-2")
 
         # 4. Handler 실행 및 응답 반환
         result: Any = handler(event, dynamodb)
