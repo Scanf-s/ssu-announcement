@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple, Optional
 
 import boto3
 
@@ -12,9 +12,10 @@ logger = logging.getLogger("[SSU_ANNOUNCEMENT_API_HANDLER]")
 # Route mapping
 ROUTES: Dict[Tuple, Callable] = {
     ("GET", "/subscribe"): subscribe.get_subscribes,
+    ("POST", "/subscribe"): subscribe.add_subscribe,
+    ("DELETE", "/subscribe"): subscribe.delete_subscribe,
     ("GET", "/health"): healthcheck.health_check,
 }
-
 ALLOW_METHODS: List[str] = ["GET", "POST", "DELETE", "OPTIONS", "HEAD"]
 
 
@@ -38,8 +39,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         dynamodb: Any = boto3.resource("dynamodb", region_name="ap-northeast-2")
 
         # 4. Handler 실행 및 응답 반환
-        result: Any = handler(event, dynamodb)
-        return success_response(result)
+        result: Optional[Any] = handler(event, dynamodb)
+        if http_method == "POST":
+            return success_response(result, 201)
+        else:
+            return success_response(result)
 
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")

@@ -11,10 +11,7 @@ from api.utils.error import SubscriptionNotFound
 
 def get_subscribes(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
     # 1. Query parameter에서 Email 추출
-    query_params: Optional[dict[str, Any]] = event.get("queryStringParameters")
-    email = query_params.get("email", "") if query_params else None
-    if not email:
-        raise ValueError("Email parameter is required")
+    email: str = _get_email_from_event(event)
 
     # 2. 테이블 설정
     table: Any = db_session.Table(os.getenv("SUBSCRIPTION_TABLE"))
@@ -25,3 +22,37 @@ def get_subscribes(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
         raise SubscriptionNotFound(email)
 
     return {"subscribes": subscribes}
+
+def add_subscribe(event: Dict[str, Any], db_session: Any) -> None:
+    # Query parameter에서 Email, Category 추출
+    email: str = _get_email_from_event(event)
+    category: str = _get_category_from_event(event)
+
+    # Set table
+    table: Any = db_session.Table(os.getenv("SUBSCRIPTION_TABLE"))
+
+    # Add subscription
+    repo.add_subscription(table=table, email=email, category=category)
+
+def delete_subscribe(event: Dict[str, Any], db_session: Any) -> None:
+    # Query parameter에서 Email, Category 추출
+    email: str = _get_email_from_event(event)
+    category: str = _get_category_from_event(event)
+
+    # Set table
+    table: Any = db_session.Table(os.getenv("SUBSCRIPTION_TABLE"))
+
+    # Delete subscription
+    repo.delete_subscription(table=table, email=email, category=category)
+
+def _get_email_from_event(event: Dict[str, Any]) -> str:
+    email: Optional[str] = event.get("queryStringParameters", {}).get("email", "")
+    if not email:
+        raise ValueError("Email parameter is required")
+    return email
+
+def _get_category_from_event(event: Dict[str, Any]) -> str:
+    category: Optional[str] = event.get("queryStringParameters", {}).get("category", "")
+    if not category:
+        raise ValueError("Category parameter is required")
+    return category
