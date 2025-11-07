@@ -1,4 +1,6 @@
-EVENTWORKER_LAMBDA_FUNCTION_NAME ?= asdf
+EVENTWORKER_LAMBDA_FUNCTION_NAME ?= NEED TO BE SET
+NOTIFIER_LAMBDA_FUNCTION_NAME ?= NEED TO BE SET
+SSU_ANNOUNCE_API_LAMBDA_FUNCTION_NAME ?= NEED TO BE SET
 AWS_REGION ?= ap-northeast-2
 
 # Eventworker 빌드
@@ -47,3 +49,37 @@ clean-notifier:
 	rm -f notifier/bootstrap
 	rm -f notifier/notifier.zip
 	@echo "Cleanup completed"
+
+# API 빌드
+build-api:
+	@echo "Building API service"
+	cd api && mkdir -p package
+	cd api && /usr/bin/python3 -m pip install --target ./package -r requirements.txt
+	cd api && zip -r ssu-announce-api.zip . \
+		-x ".venv/*" \
+		-x ".env" \
+		-x "tests/*" \
+		-x "__pycache__/*" \
+		-x "*.pyc" \
+		-x ".python-version" \
+		-x "uv.lock"
+	@echo "API build completed"
+
+# API 배포
+deploy-api:
+	@echo "Deploying API service"
+	aws lambda update-function-code \
+		--function-name $(SSU_ANNOUNCE_API_LAMBDA_FUNCTION_NAME) \
+		--zip-file fileb://api/ssu-announce-api.zip \
+		--region $(AWS_REGION)
+	@echo "API deployment completed"
+
+# API 빌드 정리
+clean-api:
+	@echo "Cleaning up"
+	cd api && find . -path ./package -prune -o -name '*.pyc' -exec rm -f {} +
+	cd api && find . -path ./package -prune -o -name '__pycache__' -exec rm -rf {} +
+	rm -rf api/package
+	rm -f api/ssu-announce-api.zip
+	@echo "Cleanup completed"
+

@@ -47,3 +47,5 @@ eventworker.zip
 
 # Python
 **/__pycache__/**
+api/package
+api/ssu-announce-api.zip
