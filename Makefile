@@ -55,7 +55,7 @@ build-api:
 	@echo "Building API service"
 	cd api && mkdir -p package
 	cd api && /usr/bin/python3 -m pip install --target ./package -r requirements.txt
-	cd api && zip -r ssu-announce-api.zip . \
+	cd api && zip -r ssu-announcement-api.zip . \
 		-x ".venv/*" \
 		-x ".env" \
 		-x "tests/*" \
@@ -70,7 +70,7 @@ deploy-api:
 	@echo "Deploying API service"
 	aws lambda update-function-code \
 		--function-name $(SSU_ANNOUNCE_API_LAMBDA_FUNCTION_NAME) \
-		--zip-file fileb://api/ssu-announce-api.zip \
+		--zip-file fileb://api/ssu-announcement-api.zip \
 		--region $(AWS_REGION)
 	@echo "API deployment completed"
 
@@ -80,6 +80,6 @@ clean-api:
 	cd api && find . -path ./package -prune -o -name '*.pyc' -exec rm -f {} +
 	cd api && find . -path ./package -prune -o -name '__pycache__' -exec rm -rf {} +
 	rm -rf api/package
-	rm -f api/ssu-announce-api.zip
+	rm -f api/ssu-announcement-api.zip
 	@echo "Cleanup completed"
 

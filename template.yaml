@@ -191,6 +191,32 @@ Resources:
             BatchSize: 1
             Enabled: true
 
+  # SSU Announcement API Lambda handler
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ssu-announcement-api
+      PackageType: Zip
+      Handler: lambda_handler
+      Runtime: provided.al2023
+      CodeUri: ./api/ssu-announcement-api.zip
+      Timeout: 30
+      ReservedConcurrentExecutions: 5
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SubscriptionTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ssu-announcement/*'
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: '*'
+
 Outputs:
   AnnouncementTableName:
     Description: DynamoDB table for announcements
