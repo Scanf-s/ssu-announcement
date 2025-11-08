@@ -69,6 +69,8 @@ Resources:
           AttributeType: S
         - AttributeName: Category # SK
           AttributeType: S
+        - AttributeName: UnsubscribeToken # GSI Key
+          AttributeType: S
       KeySchema:
         - AttributeName: Email
           KeyType: HASH
@@ -78,6 +80,12 @@ Resources:
         - IndexName: CategoryIndex # 카테고리별 구독자 조회용 GSI
           KeySchema:
             - AttributeName: Category
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: UnsubscribeTokenIndex # 토큰 조회용 GSI
+          KeySchema:
+            - AttributeName: UnsubscribeToken
               KeyType: HASH
           Projection:
             ProjectionType: ALL
@@ -275,6 +283,13 @@ Resources:
                 uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations'
                 payloadFormatVersion: '1.0'
             delete:
+              x-amazon-apigateway-integration:
+                type: aws_proxy
+                httpMethod: POST
+                uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations'
+                payloadFormatVersion: '1.0'
+          /unsubscribe:
+            get:
               x-amazon-apigateway-integration:
                 type: aws_proxy
                 httpMethod: POST

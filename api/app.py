@@ -13,8 +13,8 @@ logger.setLevel(logging.INFO)
 # Route mapping
 ROUTES: Dict[Tuple, Callable] = {
     ("GET", "/subscribe"): subscribe.get_subscribes,
-    ("POST", "/subscribe"): subscribe.add_subscribe,
-    ("DELETE", "/subscribe"): subscribe.delete_subscribe,
+    ("POST", "/subscribe"): subscribe.subscribe,
+    ("GET", "/unsubscribe"): subscribe.unsubscribe,
     ("GET", "/health"): healthcheck.health_check,
 }
 ALLOW_METHODS: List[str] = ["GET", "POST", "DELETE", "OPTIONS", "HEAD"]
@@ -42,6 +42,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # 4. Handler 실행 및 응답 반환
         if path == "/health":
             return success_response(handler())
+
+        if path == "/unsubscribe":
+            return handler(event, dynamodb)
 
         result: Optional[Any] = handler(event, dynamodb)
         if http_method == "POST":
