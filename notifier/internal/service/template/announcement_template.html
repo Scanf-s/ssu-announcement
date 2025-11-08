@@ -12,7 +12,7 @@
             <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <!-- Header -->
                 <tr>
-                    <td style="background: linear-gradient(135deg, #0066cc 0%, #004999 100%); padding: 30px 20px; text-align: center;">
+                    <td style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); padding: 30px 20px; text-align: center;">
                         <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">📢 숭실대학교 공지사항</h1>
                         <p style="margin: 10px 0 0 0; color: #e6f2ff; font-size: 14px;">숭실대학교 IT지원위원회 공지사항 알림 서비스</p>
                     </td>
@@ -47,8 +47,20 @@
                         <!-- Button -->
                         <table role="presentation" style="width: 100%; margin-top: 30px;">
                             <tr>
-                                <td align="center">
-                                    <a href="{{.Link}}" style="display: inline-block; padding: 14px 40px; background-color: #0066cc; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,102,204,0.3);">자세히 보기</a>
+                                <td style="text-align: center;">
+                                    <a href="{{.Link}}"
+                                       style="
+                                       display: inline-block;
+                                       padding: 14px 40px;
+                                       background-color: #0066cc;
+                                       color: #ffffff;
+                                       text-decoration: none;
+                                       border-radius: 6px;
+                                       font-weight: bold;
+                                       font-size: 16px;
+                                       box-shadow: 0 2px 4px rgba(0,102,204,0.3);">
+                                        공지사항 자세히 보기
+                                    </a>
                                 </td>
                             </tr>
                         </table>
@@ -59,7 +71,7 @@
                 <tr>
                     <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
                         <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 13px;">숭실대학교 IT지원위원회 공지사항 알림 서비스</p>
-                        <p style="margin: 0; color: #adb5bd; font-size: 12px;">이메일 수신을 원하지 않으시면 <a href="https://ssu-announcement.sullung.site?token={{.UnsubscribeToken}}">구독</a>을 해지해주세요.</p>
+                        <p style="margin: 0; color: #adb5bd; font-size: 12px;">이메일 수신을 원하지 않으시면 <a href="https://ssu-announcement.sullung.site/unsubscribe?token={{.UnsubscribeToken}}">구독</a>을 해지해주세요.</p>
                     </td>
                 </tr>
             </table>
