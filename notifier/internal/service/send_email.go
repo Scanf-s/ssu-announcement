@@ -16,12 +16,12 @@ func SendEmail(cfg *config.AppConfig, emailData []map[string]interface{}) error 
 	}
 	defer server.Close()
 
-	message := gomail.NewMessage()
 	for _, data := range emailData {
 		email := data["email"].(string)
 		title := data["title"].(string)
 		body := data["body"].(string)
 
+		message := gomail.NewMessage()
 		message.SetHeader("From", cfg.SmtpUser)
 		message.SetAddressHeader("To", email, "")
 		message.SetHeader("Subject", title)
