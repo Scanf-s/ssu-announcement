@@ -40,3 +40,12 @@ notifier/.env
 bootstrap
 notifier.zip
 eventworker.zip
+
+# Environment vars
+.env
+**/.env
+
+# Python
+**/__pycache__/**
+api/package
+api/ssu-announcement-api.zip

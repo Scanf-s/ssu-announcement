@@ -1,0 +1,2 @@
+class SubscriptionNotFound(Exception):
+    pass
