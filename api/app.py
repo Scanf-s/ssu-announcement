@@ -3,11 +3,12 @@ from typing import Any, Callable, Dict, List, Tuple, Optional
 
 import boto3
 
-from api.controller import healthcheck, subscribe
-from api.utils.error import SubscriptionNotFound
-from api.utils.response import error_response, success_response
+from controller import healthcheck, subscribe
+from utils.error import SubscriptionNotFound
+from utils.response import error_response, success_response
 
 logger = logging.getLogger("[SSU_ANNOUNCEMENT_API_HANDLER]")
+logger.setLevel(logging.INFO)
 
 # Route mapping
 ROUTES: Dict[Tuple, Callable] = {
@@ -39,6 +40,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         dynamodb: Any = boto3.resource("dynamodb", region_name="ap-northeast-2")
 
         # 4. Handler 실행 및 응답 반환
+        if path == "/health":
+            return success_response(handler())
+
         result: Optional[Any] = handler(event, dynamodb)
         if http_method == "POST":
             return success_response(result, 201)

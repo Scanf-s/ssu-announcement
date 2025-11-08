@@ -55,14 +55,17 @@ build-api:
 	@echo "Building API service"
 	cd api && mkdir -p package
 	cd api && /usr/bin/python3 -m pip install --target ./package -r requirements.txt
+	cd api/package && zip -r ../ssu-announcement-api.zip .
 	cd api && zip -r ssu-announcement-api.zip . \
+		-x "package/*" \
 		-x ".venv/*" \
 		-x ".env" \
 		-x "tests/*" \
 		-x "__pycache__/*" \
 		-x "*.pyc" \
 		-x ".python-version" \
-		-x "uv.lock"
+		-x "uv.lock" \
+		-x "ssu-announcement-api.zip"
 	@echo "API build completed"
 
 # API 배포

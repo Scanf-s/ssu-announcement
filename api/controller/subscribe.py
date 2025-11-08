@@ -3,11 +3,21 @@ Subscribe endpoints handler
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
-from api.repository.subscription_repository import repo
-from api.utils.error import SubscriptionNotFound
+from repository.subscription_repository import repo
+from utils.error import SubscriptionNotFound
 
+CATEGORIES: List[str] = [
+    "ssu_path",
+    "학사",
+    "국제교류",
+    "봉사",
+    "비교과·행사",
+    "장학",
+    "채용",
+    "all",
+]
 
 def get_subscribes(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
     # 1. Query parameter에서 Email 추출
@@ -55,4 +65,8 @@ def _get_category_from_event(event: Dict[str, Any]) -> str:
     category: Optional[str] = event.get("queryStringParameters", {}).get("category", "")
     if not category:
         raise ValueError("Category parameter is required")
+
+    if category not in CATEGORIES:
+        raise ValueError("Invalid category")
+
     return category

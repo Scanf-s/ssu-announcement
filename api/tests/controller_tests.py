@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from typing import Dict, Any
 import os
 from dotenv import load_dotenv
-from api.handler import lambda_handler
+from api.app import lambda_handler
 
 load_dotenv(".env")
 
