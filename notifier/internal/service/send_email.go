@@ -33,7 +33,6 @@ func SendEmail(cfg *config.AppConfig, emailData []map[string]interface{}) error 
 		} else {
 			log.Printf("Email sent successfully to %s", email)
 		}
-		message.Reset() // 다음 이메일을 위해 메시지 초기화
 	}
 
 	return nil
