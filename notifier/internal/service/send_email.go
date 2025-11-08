@@ -1,14 +1,13 @@
 package service
 
 import (
-	"fmt"
 	"log"
 	"notifier/config"
 
 	"gopkg.in/gomail.v2"
 )
 
-func SendEmail(cfg *config.AppConfig, emails []string, body string, subject string) error {
+func SendEmail(cfg *config.AppConfig, emailData []map[string]interface{}) error {
 
 	dialer := gomail.NewDialer(cfg.SmtpHost, 587, cfg.SmtpUser, cfg.SmtpPass)
 	server, err := dialer.Dial()
@@ -17,25 +16,24 @@ func SendEmail(cfg *config.AppConfig, emails []string, body string, subject stri
 	}
 	defer server.Close()
 
-	successCount := 0
 	message := gomail.NewMessage()
-	for _, email := range emails {
+	for _, data := range emailData {
+		email := data["email"].(string)
+		title := data["title"].(string)
+		body := data["body"].(string)
+
 		message.SetHeader("From", cfg.SmtpUser)
 		message.SetAddressHeader("To", email, "")
-		message.SetHeader("Subject", subject)
+		message.SetHeader("Subject", title)
 		message.SetBody("text/html", body)
 
 		if err = gomail.Send(server, message); err != nil {
 			log.Printf("Failed to send email to %s: %v", email, err)
+			// TODO: 추후 Fallback 로직 추가 (DLQ를 활용하던가 아님 Fallback 로직을 여기에다가 추가하던가..)
 		} else {
-			successCount++
 			log.Printf("Email sent successfully to %s", email)
 		}
 		message.Reset() // 다음 이메일을 위해 메시지 초기화
-	}
-
-	if successCount == 0 {
-		return fmt.Errorf("failed to send email to all subscribers")
 	}
 
 	return nil

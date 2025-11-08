@@ -77,7 +77,6 @@ def unsubscribe(event: Dict[str, Any], db_session: Any) -> Dict[str, Any]:
 
         # Return success HTML
         return html_response(get_unsubscribe_success_page(email, category), 200)
-
     except Exception as e:
         return html_response(get_unsubscribe_error_page(f"오류가 발생했습니다"), 500)
 

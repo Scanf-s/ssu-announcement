@@ -11,20 +11,20 @@ import (
 
 func NotificationService(ctx context.Context, cfg *config.AppConfig, data dto.Message, category string) error {
 
-	emails, err := repository.GetSubscribers(ctx, cfg, category)
+	subscribers, err := repository.GetSubscribers(ctx, cfg, category)
 	if err != nil {
 		return err
 	}
-	if len(emails) == 0 {
+	if len(subscribers) == 0 {
 		return fmt.Errorf("no subscribers for category: %s", category)
 	}
 
-	emailBody, err := CreateEmailTemplate(category, data)
+	emailTemplates, err := CreateEmailTemplate(subscribers, category, data)
 	if err != nil {
 		return err
 	}
 
-	err = SendEmail(cfg, emails, emailBody, data.GetTitle())
+	err = SendEmail(cfg, emailTemplates)
 	if err != nil {
 		return err
 	}

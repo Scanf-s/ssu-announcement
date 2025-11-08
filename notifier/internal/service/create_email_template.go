@@ -15,36 +15,87 @@ var announcementTemplate string
 //go:embed template/ssu_path_template.html
 var ssuPathTemplate string
 
-func CreateEmailTemplate(category string, data dto.Message) (string, error) {
+func CreateEmailTemplate(subscribers []map[string]interface{}, category string, data dto.Message) ([]map[string]interface{}, error) {
 	var rawTemplate string
-	var templateData interface{}
+	var baseData interface{}
+	var emailBodies []map[string]interface{}
 
+	// Create basic data, determine HTML email raw template
 	if category == "ssu_path" {
 		rawTemplate = ssuPathTemplate
 		ssuPathData, ok := data.(dto.SSUPathMessage)
 		if !ok {
-			return "", fmt.Errorf("failed to cast data to SSUPathMessage")
+			return nil, fmt.Errorf("failed to cast data to SSUPathMessage")
 		}
-		templateData = ssuPathData
-	} else { // 다른 카테고리는 숭실대학교 공지사항 데이터로 취급
+		baseData = ssuPathData
+	} else {
 		rawTemplate = announcementTemplate
 		announcementData, ok := data.(dto.AnnouncementMessage)
 		if !ok {
-			return "", fmt.Errorf("failed to cast data to AnnouncementMessage")
+			return nil, fmt.Errorf("failed to cast data to AnnouncementMessage")
 		}
-		templateData = announcementData
+		baseData = announcementData
 	}
 
-	tmpl, err := template.New("EmailTemplate").Parse(rawTemplate)
+	// Parse(Read) email template
+	emailTemplate, err := template.New("EmailTemplate").Parse(rawTemplate)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse template: %w", err)
+		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
 
-	var buffer bytes.Buffer                   // HTML 내용 담아둘 버퍼
-	err = tmpl.Execute(&buffer, templateData) // 템플릿에다가 데이터 적용
+	// Type assertion and Create email HTML body with data
+	if category == "ssu_path" {
+		ssuBaseData := baseData.(dto.SSUPathMessage)
+		for _, subscriber := range subscribers {
+			email := subscriber["Email"].(string)
+			token := subscriber["UnsubscribeToken"].(string)
+
+			data := ssuBaseData
+			data.Email = email
+			data.UnsubscribeToken = token
+
+			emailData, err := createEmailTemplate(emailTemplate, data)
+			if err != nil {
+				return nil, err
+			}
+			emailBodies = append(emailBodies, emailData)
+		}
+	} else {
+		announcementBaseData := baseData.(dto.AnnouncementMessage)
+		for _, subscriber := range subscribers {
+			email := subscriber["Email"].(string)
+			token := subscriber["UnsubscribeToken"].(string)
+
+			data := announcementBaseData
+			data.Email = email
+			data.UnsubscribeToken = token
+
+			emailData, err := createEmailTemplate(emailTemplate, data)
+			if err != nil {
+				return nil, err
+			}
+			emailBodies = append(emailBodies, emailData)
+		}
+	}
+	return emailBodies, nil
+}
+
+func createEmailTemplate(emailTemplate *template.Template, templateData interface{}) (map[string]interface{}, error) {
+	var buffer bytes.Buffer
+	err := emailTemplate.Execute(&buffer, templateData)
 	if err != nil {
-		return "", fmt.Errorf("failed to execute template: %w", err)
+		return nil, fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	return buffer.String(), nil
+	// templateData를 dto.Message 인터페이스로 타입 단언
+	message, ok := templateData.(dto.Message)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast templateData to dto.Message")
+	}
+
+	return map[string]interface{}{
+		"email": message.GetEmail(),
+		"title": message.GetTitle(),
+		"body":  buffer.String(),
+	}, nil
 }
