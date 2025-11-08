@@ -27,3 +27,13 @@ def error_response(status_code: int, message: str) -> Dict[str, Any]:
             ensure_ascii=False,
         ),
     }
+
+
+def html_response(html_content: str, status_code: int = 200) -> Dict[str, Any]:
+    return {
+        "statusCode": status_code,
+        "headers": {
+            "Content-Type": "text/html; charset=utf-8",
+        },
+        "body": html_content,
+    }
