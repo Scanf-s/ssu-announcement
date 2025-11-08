@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-func GetSubscribers(ctx context.Context, cfg *config.AppConfig, category string) ([]string, error) {
+func GetSubscribers(ctx context.Context, cfg *config.AppConfig, category string) ([]map[string]interface{}, error) {
 	// 구독자 목록가져오는 로직
 	dbClient := cfg.DynamoDBClient
 	tableName := cfg.DBTableName
@@ -28,12 +28,17 @@ func GetSubscribers(ctx context.Context, cfg *config.AppConfig, category string)
 		return nil, err
 	}
 
-	var emails []string
+	var data []map[string]interface{}
 	for _, item := range result.Items { // 이메일 목록 추출
 		email := item["Email"].(*types.AttributeValueMemberS).Value
-		// *types.AttributeValueMemberS(tring) 타입으로 변환 후 Value 필드 접근해서 String 뽑아낼 수 있음
-		emails = append(emails, email)
+		token := item["UnsubscribeToken"].(*types.AttributeValueMemberS).Value
+		// *types.AttributeValueMemberS(string) 타입으로 변환 후 Value 필드 접근해서 String 뽑아낼 수 있음
+
+		data = append(data, map[string]interface{}{
+			"Email":            email,
+			"UnsubscribeToken": token,
+		})
 	}
 
-	return emails, nil
+	return data, nil
 }
