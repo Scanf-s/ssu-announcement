@@ -51,6 +51,6 @@ func handleRequest(ctx context.Context, event json.RawMessage) (string, error) {
 		return "", err
 	}
 
-	log.Println("All scraping tasks completed successfully")
+	log.Println("All scraping tasks completed successfully!")
 	return "Success", nil
 }
