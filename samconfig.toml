@@ -5,7 +5,7 @@ stack_name = "ssu-announcement"
 resolve_s3 = true
 s3_prefix = "ssu-announcement"
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\" DomainName=\"ssu-announcement.sullung.site\""
+parameter_overrides = "AnnouncementTableName=\"ssu-announcements\" SubscriptionTableName=\"ssu-subscriptions\" QueueName=\"ssu-notification-queue\" DomainName=\"ssunnounce.sssupport.shop\""
 image_repositories = []
 confirm_changeset = true
 
