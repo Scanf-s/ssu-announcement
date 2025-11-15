@@ -22,11 +22,18 @@ Parameters:
   DomainName:
     Type: String
     Description: API Gateway domain name
-    Default: ssu-announcement.sullung.site
+    Default: ssunnounce.sssupport.shop
+
+  HostedZoneId:
+    # Do not set main hosted zone ID.
+    # The value has to be set ssunnounce sub-hosted zone id
+    Type: String
+    Description: Route53 Hosted Zone ID for ssunnounce record
+    NoEcho: true
 
   CertificateArn:
     Type: String
-    Description: Certificate ARN for API Gateway domain name
+    Description: Certificate ARN for API Gateway domain name (Seoul Region)
     NoEcho: true
 
 # Lambda 기본값 설정
@@ -322,6 +329,18 @@ Resources:
       ApiId: !Ref AnnouncementApiGateway
       Stage: !Ref AnnouncementApiGateway.Stage
 
+  # Before deploying the Route53 record,
+  # you must construct a hosted zone in Route53 through a terraform project (itsupport-aws/project/global, ssunnounce)
+  SSUnnounceRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
+        DNSName: !GetAtt ApiDomainName.RegionalDomainName
+        EvaluateTargetHealth: false
 
 Outputs:
   AnnouncementTableName:
