@@ -66,6 +66,7 @@ func handleRequest(ctx context.Context, event events.DynamoDBEvent) (string, err
 			if err != nil {
 				log.Printf("Failed to send message to SQS: %s", err)
 			}
+			log.Printf("Successfully sent message to SQS: %s", message)
 		}
 	}
 
